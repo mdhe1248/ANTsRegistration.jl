@@ -1,7 +1,7 @@
 Forked from timholy/ANTsRegistration.jl
 - ANTs binary will not be automatically installed. It is outdated.
 - To use this fork, please first install ANTsRegistration on your machine. For installation, the following websites might help:
-https://github.com/ANTsX/ANTs/releases,  https://github.com/ANTsX/ANTs/wiki/Installing-ANTs-release-binaries
+https://github.com/ANTsX/ANTs?tab=readme-ov-file, https://github.com/ANTsX/ANTs/releases,  https://github.com/ANTsX/ANTs/wiki/Installing-ANTs-release-binaries
 - `antsApplyTransforms` and `antsApplyTransformsToPoints` functions are added. Please see runtest codes.
 
 # ANTsRegistration
