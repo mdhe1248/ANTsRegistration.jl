@@ -1,0 +1,140 @@
+abstract type AbstractAntsInterpolation end
+
+####Interpolation mode
+interpolation_mode = ("Linear", "NearestNeighbor", "MultiLabel", "Gaussian", "BSpline", "CosineWindowedSinc", "HammingWindowedSinc", "LanczosWindowedSinc", "GenericLabel") 
+
+struct Linear<:AbstractAntsInterpolation
+    mode::AbstractString
+end
+Linear() = Linear("Linear")
+
+struct NearestNeighbor<:AbstractAntsInterpolation
+    mode::AbstractString
+end
+NearestNeighbor() = NearestNeighbor("NearestNeighbor")
+
+### FIXME multilabel
+struct MultiLabel{N}<:AbstractAntsInterpolation
+   mode::AbstractString
+   sigma::NTuple{N, Float64}
+   alpha::Float64
+end
+
+### FIXME gaussian
+struct Gaussian{N}<:AbstractAntsInterpolation
+   mode::AbstractString
+   sigma::NTuple{N, Number}
+   alpha::Float64
+end
+
+struct BSpline<:AbstractAntsInterpolation
+    mode::AbstractString
+    order::Int
+end
+BSpline() = BSpline("BSpline", 3)
+BSpline(order) = BSpline("BSpline", order)
+
+struct CosineWindowedSinc<:AbstractAntsInterpolation
+    mode::AbstractString
+end
+CosineWindowedSinc() = CosineWindowedSinc("CosineWindowedSinc")
+
+struct WelchWindowedSinc<:AbstractAntsInterpolation
+    mode::AbstractString
+end
+WelchWindowedSinc() = WelchWindowedSinc("WelchWindowedSinc")
+
+struct HammingWindowedSinc<:AbstractAntsInterpolation
+    mode::AbstractString
+end
+HammingWindowedSinc() = HammingWindowedSinc("HammingWindowedSinc")
+
+struct LanczosWindowedSinc<:AbstractAntsInterpolation
+    mode::AbstractString
+end
+LanczosWindowedSinc() = LanczosWindowedSinc("LanczosWindowedSinc")
+
+struct GenericLabel<:AbstractAntsInterpolation
+    mode::AbstractString
+    interpolator::AbstractString
+end
+GenericLabel() = GenericLabel("GenericLabel", "Linear")
+GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
+
+#### Transformation
+struct Tform
+    transformFileName::AbstractString
+    useInverse::Int
+end
+Tform(transformFileName) = Tform(transformFileName, 0)
+
+#### Point
+struct Point
+    x::Number
+    y::Number
+    z::Number
+    t::Number
+end
+
+function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referenceFileName::AbstractString, inputFileName::AbstractString; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
+    cmd = `antsApplyTransforms -o $outputFileName -d $nd -r $referenceFileName -i $inputFileName --input-image-type $input_imagetype --output-data-type $output_datatype`
+    # Add interpolation method
+    if any(x -> isa(interpolation, x), [Linear, NearestNeighbor, CosineWindowedSinc, WelchWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc])  
+        cmd = `$cmd -n $(interpolation.mode)`
+    elseif any(x -> isa(interpolation, x), [MultiLabel, Gaussian])
+        cmd = `$cmd -n \[$(interpolation.mode), $(interpolation.sigma), $(interpolation.alpha)\]`
+    elseif any(x -> isa(interpolation, x), [BSpline])
+        cmd = `$cmd -n \[$(interpolation.mode), $(interpolation.order)\]`
+    end
+    # Add transformations
+    for tform in tforms 
+        cmd = `$cmd -t \[$(tform.transformFileName), $(tform.useInverse)\]`
+    end
+    # Other options
+    if verbose
+        cmd = `$cmd -v 1`
+    end
+    if !ismissing(default_value)
+        cmd = `$cmd --default-value $default_value`
+    end
+    # output display
+    if verbose
+        @show cmd
+    end
+    if suppressout
+        @suppress_out run(cmd)
+    else
+        run(cmd)
+    end
+end
+
+#### Apply Transforms to point
+function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, inputFileName::AbstractString; precision::Bool = false)
+    cmd = `antsApplyTransformsToPoints -o $outputFileName -d $nd -i $inputFileName`
+    if precision
+        cmd = `$cmd --precision 1`
+    end
+end
+
+function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
+    tmpinputname = tempname()*".CSV"
+    tmpoutname = tempname()*".CSV"
+    CSV.save(tmpname, points)
+    applyTransformsToPoints(tmpoutname, nd, tforms, tmpinputname; precision = precision)
+    df_tformed = CSV.read(tmpoutname, DataFrame)
+    rm(tmpinputname)
+    rm(tmpoutname)
+    return df_tformed
+end
+
+function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
+    x = map(p -> p.x, points)
+    y = map(p -> p.y, points)
+    z = map(p -> p.z, points)
+    t = map(p -> p.t, points)
+    df = DataFrame(x = x, y = y, z = z, t = z) #Make data frames
+    df_tformed = applytTransformsToPoints(nd, tforms, df; precision = precision)
+    points_tformed = map(p -> Point(p...), zip(df_tformed.x, df_tformed.y, df_tformed.z, df_tformed.t))
+    return points_tformed
+end
+
