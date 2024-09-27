@@ -1,31 +1,34 @@
 module ANTsRegistration
 
-using Images, Glob, Random, Unitful, Suppressor
+using Images, Glob, Random, Unitful, Suppressor, DataFrames, CSV
 
 export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage
+export Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms 
 
-# Load in `deps.jl`, complaining if it does not exist
-const depsjl_path = joinpath(@__DIR__, "..", "deps", "deps.jl")
-if !isfile(depsjl_path)
-    error("ANTsRegistration not installed properly, run `] build ANTsRegistration', restart Julia and try again")
-end
-include(depsjl_path)
+include("applytransforms.jl")
 
-# Module initialization function
-function __init__()
-    check_deps()
-end
-
-# Per-user working path
-function userpath()
-    td = tempdir()
-    user = ENV["USER"]
-    up = joinpath(td, user, "ANTs")
-    if !ispath(up)
-        mkpath(up)
-    end
-    return up
-end
+## Load in `deps.jl`, complaining if it does not exist
+#const depsjl_path = joinpath(@__DIR__, "..", "deps", "deps.jl")
+#if !isfile(depsjl_path)
+#    error("ANTsRegistration not installed properly, run `] build ANTsRegistration', restart Julia and try again")
+#end
+#include(depsjl_path)
+#
+## Module initialization function
+#function __init__()
+#    check_deps()
+#end
+#
+## Per-user working path
+#function userpath()
+#    td = tempdir()
+#    user = ENV["USER"]
+#    up = joinpath(td, user, "ANTs")
+#    if !ispath(up)
+#        mkpath(up)
+#    end
+#    return up
+#end
 
 
 abstract type AbstractTransformation end
@@ -200,16 +203,19 @@ function default_convergence(sz::Dims, transform::SyN)
 end
 
 
-function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, verbose::Bool=false, suppressout::Bool=true)
-    cmd = `$antsRegistration -d $nd`
+function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, verbose::Bool=false, suppressout::Bool=true, seed=nothing)
+    cmd = `antsRegistration -d $nd`
     if verbose
-        cmd = `$cmd -v`
+        cmd = `$cmd -v 1`
     end
     if histmatch
         cmd = `$cmd --use-histogram-matching`
     end
     if isa(winsorize, Tuple{Real,Real})
         cmd = `$cmd --winsorize-image-intensities \[$(winsorize[1]),$(winsorize[2])\]`
+    end
+    if isa(seed, Int)
+        cmd = `$cmd --random-seed $seed`
     end
     for pipe in pipeline
         cmd = shcmd(cmd, pipe, fixedname, movingname)
@@ -220,7 +226,7 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
         @show cmd
     end
     if suppressout
-    @suppress_out run(cmd)
+        @suppress_out run(cmd)
     else
         run(cmd)
     end
