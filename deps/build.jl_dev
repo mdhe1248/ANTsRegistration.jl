@@ -1,0 +1,53 @@
+using BinaryProvider # requires BinaryProvider 0.3.0 or later
+
+# Parse some basic command-line arguments
+const verbose = "--verbose" in ARGS
+const prefix = Prefix(get([a for a in ARGS if a != "--verbose"], 1, joinpath(@__DIR__, "usr")))
+products = [
+    ExecutableProduct(prefix, "ANTS", :ants),
+    ExecutableProduct(prefix, "antsRegistration", :antsRegistration),
+    ExecutableProduct(prefix, "antsApplyTransforms", :antsApplyTransforms),
+    ExecutableProduct(prefix, "antsApplyTransformsToPoints", :antsApplyTransformsToPoints),
+    ExecutableProduct(prefix, "antsMotionCorr", :antsMotionCorr)
+]
+
+# Download binaries from hosted location
+bin_prefix = "https://github.com/ANTsX/ANTs/releases/download"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-macos-12-X64-clang.zip"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-macos-14-ARM64-clang.zip"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-ubuntu-20.04-X64-gcc.zip"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-ubuntu-22.04-X64-gcc.zip"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-ubuntu-24.04-X64-gcc.zip"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-windows-2022-X64-VS2019.zip"
+#bin_prefix = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-v2.5.3-ubuntu18.04-X64-gcc.zip"
+
+# Version 2.5.3 for macOS and Ubuntu, 2.5.3 for Windows
+v = "2.5.3"
+
+# Listing of files for the respective versions
+download_info = Dict(
+    MacOS(:x86_64) => ("$bin_prefix/$v/ants-$v-macos-14-ARM64-clang.zip", "Need_to_find_sha"),
+    Linux(:x86_64, libc=:glibc) => ("https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-ubuntu-22.04-X64-gcc.zip", "d7dc8ab1fe0829081804e0b356461c3af13c0fe8353bb59cd27de1a1689f1193"),
+    Windows(:x86_64) => ("$bin_prefix/$v/ants-$v-windows-2022-X64-VS2019.zip", "Need_to_find_sha"),
+)
+
+# Install unsatisfied or updated dependencies:
+unsatisfied = any(!satisfied(p; verbose=verbose) for p in products)
+dl_info = choose_download(download_info, platform_key_abi())
+if dl_info === nothing && unsatisfied
+    # If we don't have a compatible .tar.gz to download, complain.
+    # Alternatively, you could attempt to install from a separate provider,
+    # build from source or something even more ambitious here.
+    error("Your platform (\"$(Sys.MACHINE)\", parsed as \"$(triplet(platform_key_abi()))\") is not supported by this package!")
+end
+
+# If we have a download, and we are unsatisfied (or the version we're
+# trying to install is not itself installed) then load it up!
+if unsatisfied || !isinstalled(dl_info...; prefix=prefix)
+    # Download and install binaries
+    install(dl_info...; prefix=prefix, force=true, verbose=verbose)
+end
+
+# Write out a deps.jl file that will contain mappings for our products
+write_deps_file(joinpath(@__DIR__, "deps.jl"), products, verbose=verbose)
+
