@@ -1,4 +1,3 @@
-
 abstract type AbstractAntsInterpolation end
 
 ####Interpolation mode
