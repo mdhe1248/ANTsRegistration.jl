@@ -3,7 +3,7 @@ module ANTsRegistration
 using Images, Glob, Random, Unitful, Suppressor, DataFrames, CSV
 
 export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage
-export Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms 
+export Tform, Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms
 
 include("applytransforms.jl")
 
