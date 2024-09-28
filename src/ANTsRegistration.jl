@@ -126,7 +126,10 @@ struct Stage{N,T}
     iterations::NTuple{N,Int}
     convergencethresh::Float64
     convergencewindow::Int
+    restrictdeformation::NTuple{N,Int}
 end
+
+Stage(transform::abstractTransformation, metric::AbstractMetric, shrink::NTuple{N,Int}, smooth::NTuple{N,T}, iterations::NTuple{N,Int}, convergencethresh::Float64, convergencewindow::Int) = Stage(transform, metric, shrink, smooth, iterations, convergencethresh, convergencewindow, (missing,)) #Add restrict deformation
 
 Stage(img::AbstractArray, transform::AbstractTransformation, metric::AbstractMetric,
       shrink::NTuple{N,Int}, smooth::NTuple{N,Any}, iterations::NTuple{N,Int}) where N =
@@ -163,6 +166,9 @@ function shcmd(cmd::Cmd, stage::Stage, fixedname, movingname; ismc::Bool=false)
     else
         cmd = `$cmd --convergence \[$(xstring(stage.iterations)),$(stage.convergencethresh),$(stage.convergencewindow)\]`
         cmd = `$cmd --shrink-factors $(xstring(stage.shrink)) --smoothing-sigmas $(xqstring(stage.smoothing))$(ustring(stage.smoothing))`
+    end
+    if !isa(stage.restrictdeformation, Tuple{Missing})
+        cmd = `$cmd --restrict-deformation $(xstring(stage.restrictdeformation))`
     end
     return cmd
 end
@@ -202,8 +208,7 @@ function default_convergence(sz::Dims, transform::SyN)
     return islarge ? ((100,100,70,50,0), 1e-6, 10) : ((100,70,50,0), 1e-6, 10)
 end
 
-
-function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, verbose::Bool=false, suppressout::Bool=true, seed=nothing)
+function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, initial_moving_transform = missing, initial_fixed_transform = missing, seed=nothing, verbose::Bool=false, suppressout::Bool=true)
     cmd = `antsRegistration -d $nd`
     if verbose
         cmd = `$cmd -v 1`
@@ -216,6 +221,16 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
     end
     if isa(seed, Int)
         cmd = `$cmd --random-seed $seed`
+    end
+    if isa(initial_moving_transform, Tform)
+        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
+    elseif isa(initial_moving_transform, NTuple)
+        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform[1]), $(initial_moving_tform[2]), $(initial_moving_tform[3])\]`
+    end
+    if isa(initial_fixed_transform, Tform)
+        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
+    elseif isa(initial_fixed_transform, NTuple)
+        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform[1]), $(initial_fixed_tform[2]), $(initial_fixed_tform[3])\]`
     end
     for pipe in pipeline
         cmd = shcmd(cmd, pipe, fixedname, movingname)
