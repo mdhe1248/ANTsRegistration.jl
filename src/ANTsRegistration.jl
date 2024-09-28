@@ -129,7 +129,7 @@ struct Stage{N,T}
     restrictdeformation::NTuple{N,Int}
 end
 
-Stage(transform::AbstractTransformation, metric::AbstractMetric, shrink::NTuple{N,Int}, smooth::NTuple{N,T}, iterations::NTuple{N,Int}, convergencethresh::Float64, convergencewindow::Int) where N = Stage(transform, metric, shrink, smooth, iterations, convergencethresh, convergencewindow, (missing,)) #Add restrict deformation
+Stage(transform::AbstractTransformation, metric::AbstractMetric, shrink::NTuple{N,Int}, smooth::NTuple{N,T}, iterations::NTuple{N,Int}, convergencethresh::Float64, convergencewindow::Int) where {N,T} = Stage(transform, metric, shrink, smooth, iterations, convergencethresh, convergencewindow, (missing,)) #Add restrict deformation
 
 Stage(img::AbstractArray, transform::AbstractTransformation, metric::AbstractMetric,
       shrink::NTuple{N,Int}, smooth::NTuple{N,Any}, iterations::NTuple{N,Int}) where N =
