@@ -118,7 +118,7 @@ metric(cmd::Cmd, fixedname, movingname, m::CC) =
     `$cmd --metric CC\[$fixedname,$movingname,$(m.metricweight),$(m.radius)\]`
 
 
-struct Stage{N,T}
+struct Stage{N,D,T}
     transform::AbstractTransformation
     metric::AbstractMetric
     shrink::NTuple{N,Int}
@@ -126,10 +126,10 @@ struct Stage{N,T}
     iterations::NTuple{N,Int}
     convergencethresh::Float64
     convergencewindow::Int
-    restrictdeformation::NTuple{N,Int}
+    restrictdeformation::NTuple{D,Any}
 end
 
-Stage(transform::AbstractTransformation, metric::AbstractMetric, shrink::NTuple{N,Int}, smooth::NTuple{N,T}, iterations::NTuple{N,Int}, convergencethresh::Float64, convergencewindow::Int) where {N,T} = Stage(transform, metric, shrink, smooth, iterations, convergencethresh, convergencewindow, (missing,)) #Add restrict deformation
+Stage(transform::AbstractTransformation, metric::AbstractMetric, shrink::NTuple{N,Int}, smooth::NTuple{N,Any}, iterations::NTuple{N,Int}, convergencethresh::Float64, convergencewindow::Int) where N = Stage(transform, metric, shrink, smooth, iterations, convergencethresh, convergencewindow, (missing,)) #Add restrict deformation
 
 Stage(img::AbstractArray, transform::AbstractTransformation, metric::AbstractMetric,
       shrink::NTuple{N,Int}, smooth::NTuple{N,Any}, iterations::NTuple{N,Int}) where N =
