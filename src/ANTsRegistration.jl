@@ -2,10 +2,12 @@ module ANTsRegistration
 
 using Images, Glob, Random, Unitful, Suppressor, DataFrames, CSV
 
-export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage
+export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage, register1111
 export Tform, Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms
+#export ITKTransform, convertTransformFile, load_itktform, save_itktform
 
 include("applytransforms.jl")
+#include("convertTransformFiles.jl")
 
 ## Load in `deps.jl`, complaining if it does not exist
 #const depsjl_path = joinpath(@__DIR__, "..", "deps", "deps.jl")
@@ -245,6 +247,76 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
     else
         run(cmd)
     end
+end
+
+function register1111(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, initial_moving_transform = missing, initial_fixed_transform = missing, seed=nothing, verbose::Bool=false, suppressout::Bool=true)
+    cmd = `antsRegistration -d $nd`
+    if verbose
+        cmd = `$cmd -v 1`
+    end
+    if histmatch
+        cmd = `$cmd --use-histogram-matching`
+    end
+    if isa(winsorize, Tuple{Real,Real})
+        cmd = `$cmd --winsorize-image-intensities \[$(winsorize[1]),$(winsorize[2])\]`
+    end
+    if isa(seed, Int)
+        cmd = `$cmd --random-seed $seed`
+    end
+    if isa(initial_moving_transform, Tform)
+        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
+    elseif isa(initial_moving_transform, NTuple)
+        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform[1]), $(initial_moving_tform[2]), $(initial_moving_tform[3])\]`
+    end
+    if isa(initial_fixed_transform, Tform)
+        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
+    elseif isa(initial_fixed_transform, NTuple)
+        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform[1]), $(initial_fixed_tform[2]), $(initial_fixed_tform[3])\]`
+    end
+    for pipe in pipeline
+        cmd = shcmd(cmd, pipe, fixedname, movingname)
+    end
+    cmd = `$cmd --output `
+    cmd = shcmd(cmd, output)
+    if verbose
+        @show cmd
+    end
+    if suppressout
+        @suppress_out run(cmd)
+    else
+        run(cmd)
+    end
+    return_tforms(pipeline)
+end
+
+function return_tforms(pipeline::AbstractVector{<:Stage})
+    tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
+    output = Vector{ITKTransform}()
+    if Global ∈ tformlist
+        aff_tempfile = tempname()
+        afffile = string(output*"0GenericAffine.mat")
+        convertTransformFile(afffile, aff_tempfile)
+        aff_tform = load_itktransform(aff_tempfile) 
+        push!(output, aff_tform)
+        rm(aff_tempfile)
+    end
+    if SyN ∈ tformlist
+        # warp transformation
+        warp_tempfile= tempname()
+        warpfile = string(output*"1Warp.nii.gz")
+        convertTransformFile(warpfile, warp_tempfile)
+        warp_tform = load_itktransform(warp_tempfile) 
+        push!(output, warp_tform)
+        rm(warp_tempfile)
+        # inversewarp transformation
+        inv_tempfile = tempname()
+        invfile = string(output*"1InverseWarp.nii.gz")
+        convertTransformFile(invfile, inv_tempfile)
+        inv_tform = load_itktransform(inv_tempfile) 
+        push!(output, inv_tform)
+        rm(inv_tempfile)
+    end
+    output
 end
 
 function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline::AbstractVector{<:Stage}; kwargs...)
