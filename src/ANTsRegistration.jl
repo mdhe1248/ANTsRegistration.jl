@@ -327,9 +327,10 @@ function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline:
     end
     fixedname = write_nrrd(fixed)
     movingname = write_nrrd(moving)
-    imgw = register(output, sdims(fixed), fixedname, movingname, pipeline; kwargs...)
+    tforms = register(output, sdims(fixed), fixedname, movingname, pipeline; kwargs...)
     rm(movingname)
     rm(fixedname)
+    return tforms
 end
 
 function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage}; kwargs...)
@@ -338,7 +339,7 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
     tfmname = joinpath(up, outname*"_warp")
     warpedname = joinpath(up, outname*".nrrd")
     output = (tfmname, warpedname)
-    register(output, fixed, moving, pipeline; kwargs...)
+    tforms = register(output, fixed, moving, pipeline; kwargs...)
     imgw = load(warpedname)
     rm(warpedname)
     for tfmfile in glob(outname*"_warp"*"*.mat", up)
@@ -347,7 +348,7 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
     for tfmfile in glob(outname*"_warp"*"*.nii.gz", up)
         rm(tfmfile)
     end
-    return imgw
+    return (imgw, tforms)
 end
 
 register(output, fixed::AbstractArray, moving, pipeline::Stage; kwargs...) =
