@@ -6,6 +6,22 @@ struct ITKTransform
     fixedparameters::NTuple
 end
 
+function Base.show(io::IO, s::ITKTransform)
+# Define how to print the `id` field
+    print(io, "ITKTransform(version = $(s.version), \n")
+    print(io, "tag = $(s.tag), \n")
+    print(io, "transform = $(s.transform), \n")
+# Condense the description field to the first 50 characters (for example)
+    tuple_len = length(s.parameters)
+    if tuple_len > 10  # Limit the display to the first 10 elements
+        short_parameters= s.parameters[1:10]  # Display the first 10 elements
+        print(io, "data = ($(join(short_parameters, ", ")), ... (truncated, total length: $tuple_len)), \n")
+    else
+        print(io, "data = $(s.parameters) \n")  # Print the entire tuple if it's short
+    end
+    print(io, "fixedparameters = $(s.fixedparameters))\n")
+end
+
 """ConvertTransformFile in ANTs"""
 function convertTransformFile(tformfile::AbstractString, outputtxtfile::AbstractString)
     cmd = `ConvertTransformFile 2 $tformfile $outputtxtfile`
