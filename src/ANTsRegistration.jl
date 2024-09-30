@@ -21,16 +21,16 @@ include("convertTransformFiles.jl")
 #    check_deps()
 #end
 #
-## Per-user working path
-#function userpath()
-#    td = tempdir()
-#    user = ENV["USER"]
-#    up = joinpath(td, user, "ANTs")
-#    if !ispath(up)
-#        mkpath(up)
-#    end
-#    return up
-#end
+# Per-user working path
+function userpath()
+    td = tempdir()
+    user = ENV["USER"]
+    up = joinpath(td, user, "ANTs")
+    if !ispath(up)
+        mkpath(up)
+    end
+    return up
+end
 
 
 abstract type AbstractTransformation end
