@@ -4,7 +4,7 @@ using Images, Glob, Random, Unitful, Suppressor, DataFrames, CSV
 
 export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage, register1111
 export Tform, Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms
-export ITKTransform, convertTransformFile, load_itktform, save_itktform
+export ITKTransform, convertTransformFile, load_itktform, save_itktform, Base.show
 
 include("applytransforms.jl")
 include("convertTransformFiles.jl")
@@ -296,7 +296,7 @@ function return_tforms(output, pipeline::AbstractVector{<:Stage})
         aff_tempfile = tempname()*".txt"
         afffile = string(output*"0GenericAffine.mat")
         convertTransformFile(afffile, aff_tempfile)
-        aff_tform = load_itktform(aff_tempfile) 
+        aff_tform = load_itktform(aff_tempfile)
         push!(tform_output, aff_tform)
         rm(aff_tempfile)
     end
@@ -305,14 +305,14 @@ function return_tforms(output, pipeline::AbstractVector{<:Stage})
         warp_tempfile= tempname()*".txt"
         warpfile = string(output*"1Warp.nii.gz")
         convertTransformFile(warpfile, warp_tempfile)
-        warp_tform = load_itktform(warp_tempfile) 
+        warp_tform = load_itktform(warp_tempfile)
         push!(tform_output, warp_tform)
         rm(warp_tempfile)
         # inversewarp transformation
         inv_tempfile = tempname()*".txt"
         invfile = string(output*"1InverseWarp.nii.gz")
         convertTransformFile(invfile, inv_tempfile)
-        inv_tform = load_itktform(inv_tempfile) 
+        inv_tform = load_itktform(inv_tempfile)
         push!(tform_output, inv_tform)
         rm(inv_tempfile)
     end
