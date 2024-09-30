@@ -293,7 +293,7 @@ function return_tforms(output, pipeline::AbstractVector{<:Stage})
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
     tform_output= Vector{ITKTransform}()
     if Global ∈ tformlist
-        aff_tempfile = tempname()
+        aff_tempfile = tempname()*".txt"
         afffile = string(output*"0GenericAffine.mat")
         convertTransformFile(afffile, aff_tempfile)
         aff_tform = load_itktransform(aff_tempfile) 
@@ -302,14 +302,14 @@ function return_tforms(output, pipeline::AbstractVector{<:Stage})
     end
     if SyN ∈ tformlist
         # warp transformation
-        warp_tempfile= tempname()
+        warp_tempfile= tempname()*".txt"
         warpfile = string(output*"1Warp.nii.gz")
         convertTransformFile(warpfile, warp_tempfile)
         warp_tform = load_itktransform(warp_tempfile) 
         push!(tform_output, warp_tform)
         rm(warp_tempfile)
         # inversewarp transformation
-        inv_tempfile = tempname()
+        inv_tempfile = tempname()*".txt"
         invfile = string(output*"1InverseWarp.nii.gz")
         convertTransformFile(invfile, inv_tempfile)
         inv_tform = load_itktransform(inv_tempfile) 
