@@ -286,7 +286,7 @@ function register1111(output, nd::Int, fixedname::AbstractString, movingname::Ab
     else
         run(cmd)
     end
-    return_tforms(pipeline)
+    return_tforms(output, pipeline)
 end
 
 function return_tforms(output, pipeline::AbstractVector{<:Stage})
