@@ -341,13 +341,13 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
     output = (tfmname, warpedname)
     tforms = register(output, fixed, moving, pipeline; kwargs...)
     imgw = load(warpedname)
-    rm(warpedname)
-    for tfmfile in glob(outname*"_warp"*"*.mat", up)
-        rm(tfmfile)
-    end
-    for tfmfile in glob(outname*"_warp"*"*.nii.gz", up)
-        rm(tfmfile)
-    end
+#    rm(warpedname) #FIXME these are removed from return_tforms
+#    for tfmfile in glob(outname*"_warp"*"*.mat", up)
+#        rm(tfmfile)
+#    end
+#    for tfmfile in glob(outname*"_warp"*"*.nii.gz", up)
+#        rm(tfmfile)
+#    end
     return (imgw, tforms)
 end
 
