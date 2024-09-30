@@ -296,7 +296,7 @@ function return_tforms(output, pipeline::AbstractVector{<:Stage})
         aff_tempfile = tempname()*".txt"
         afffile = string(output*"0GenericAffine.mat")
         convertTransformFile(afffile, aff_tempfile)
-        aff_tform = load_itktransform(aff_tempfile) 
+        aff_tform = load_itktform(aff_tempfile) 
         push!(tform_output, aff_tform)
         rm(aff_tempfile)
     end
@@ -305,14 +305,14 @@ function return_tforms(output, pipeline::AbstractVector{<:Stage})
         warp_tempfile= tempname()*".txt"
         warpfile = string(output*"1Warp.nii.gz")
         convertTransformFile(warpfile, warp_tempfile)
-        warp_tform = load_itktransform(warp_tempfile) 
+        warp_tform = load_itktform(warp_tempfile) 
         push!(tform_output, warp_tform)
         rm(warp_tempfile)
         # inversewarp transformation
         inv_tempfile = tempname()*".txt"
         invfile = string(output*"1InverseWarp.nii.gz")
         convertTransformFile(invfile, inv_tempfile)
-        inv_tform = load_itktransform(inv_tempfile) 
+        inv_tform = load_itktform(inv_tempfile) 
         push!(tform_output, inv_tform)
         rm(inv_tempfile)
     end
