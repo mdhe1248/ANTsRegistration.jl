@@ -289,15 +289,15 @@ function register1111(output, nd::Int, fixedname::AbstractString, movingname::Ab
     return_tforms(pipeline)
 end
 
-function return_tforms(pipeline::AbstractVector{<:Stage})
+function return_tforms(output, pipeline::AbstractVector{<:Stage})
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
-    output = Vector{ITKTransform}()
+    tform_output= Vector{ITKTransform}()
     if Global ∈ tformlist
         aff_tempfile = tempname()
         afffile = string(output*"0GenericAffine.mat")
         convertTransformFile(afffile, aff_tempfile)
         aff_tform = load_itktransform(aff_tempfile) 
-        push!(output, aff_tform)
+        push!(tform_output, aff_tform)
         rm(aff_tempfile)
     end
     if SyN ∈ tformlist
@@ -306,17 +306,17 @@ function return_tforms(pipeline::AbstractVector{<:Stage})
         warpfile = string(output*"1Warp.nii.gz")
         convertTransformFile(warpfile, warp_tempfile)
         warp_tform = load_itktransform(warp_tempfile) 
-        push!(output, warp_tform)
+        push!(tform_output, warp_tform)
         rm(warp_tempfile)
         # inversewarp transformation
         inv_tempfile = tempname()
         invfile = string(output*"1InverseWarp.nii.gz")
         convertTransformFile(invfile, inv_tempfile)
         inv_tform = load_itktransform(inv_tempfile) 
-        push!(output, inv_tform)
+        push!(tform_output, inv_tform)
         rm(inv_tempfile)
     end
-    output
+    tform_output
 end
 
 function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline::AbstractVector{<:Stage}; kwargs...)
