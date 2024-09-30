@@ -1,4 +1,5 @@
 struct ITKTransform
+    #mode::AbstractString FIXME 
     version::AbstractString
     tag::AbstractString #Not sure what it means.
     transform::AbstractString
@@ -8,7 +9,7 @@ end
 
 function Base.show(io::IO, s::ITKTransform)
 # Define how to print the `id` field
-    print(io, "ITKTransform(version = $(s.version), \n")
+    print(io, "ITKTransform(version = $(s.version) \n")
     print(io, "tag = $(s.tag), \n")
     print(io, "transform = $(s.transform), \n")
 # Condense the description field to the first 50 characters (for example)
@@ -19,7 +20,7 @@ function Base.show(io::IO, s::ITKTransform)
     else
         print(io, "data = $(s.parameters) \n")  # Print the entire tuple if it's short
     end
-    print(io, "fixedparameters = $(s.fixedparameters))\n")
+    print(io, "fixedparameters = $(s.fixedparameters))")
 end
 
 """ConvertTransformFile in ANTs"""
