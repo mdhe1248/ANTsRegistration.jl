@@ -37,7 +37,7 @@ function itktform_textlines2struct(lines)
                      lines[2], 
                      lines[3][(findfirst(':', lines[3])+2):end],
                      Tuple(parse.(Float64, split(lines[4][(findfirst(':', lines[4])+2):end]))),
-                     Tuple(parse.(Float64, split(lines[5][(findfirst(':', lines[5])+2):end]))))
+                     Tuple(parse.(Int, split(lines[5][(findfirst(':', lines[5])+2):end]))))
     else
         @error "Transform file version does not match"
     end
