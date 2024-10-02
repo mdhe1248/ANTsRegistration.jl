@@ -350,6 +350,12 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
         kwargs = (save_tform_file = false,)
     end
     tforms = register(tfmname, fixed, moving, pipeline; kwargs...)
+    for tfmfile in glob(tfmname*"*.mat", up)
+        rm(tfmfile)
+    end
+    for tfmfile in glob(tfmname*"*.nii.gz", up)
+        rm(tfmfile)
+    end
     return tforms
 end
 
