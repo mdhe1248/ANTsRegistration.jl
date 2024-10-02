@@ -1,12 +1,3 @@
-struct ITKTransform
-    #mode::AbstractString FIXME 
-    version::AbstractString
-    tag::AbstractString #Not sure what it means.
-    transform::AbstractString
-    parameters::NTuple
-    fixedparameters::NTuple
-end
-
 function Base.show(io::IO, s::ITKTransform)
 # Define how to print the `id` field
     print(io, "ITKTransform(version = $(s.version), \n")

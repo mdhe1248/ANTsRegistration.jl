@@ -68,7 +68,16 @@ GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
 #end
 #Tform(transformFileName) = Tform(transformFileName, 0)
 
-struct Tform
+struct ITKTransform
+    #mode::AbstractString FIXME 
+    version::AbstractString
+    tag::AbstractString #Not sure what it means.
+    transform::AbstractString
+    parameters::NTuple
+    fixedparameters::NTuple
+end
+
+struct Tform #Transformation setup for antsApplyTransform
     transform::ITKTransform
     useInverse::Int
 end
