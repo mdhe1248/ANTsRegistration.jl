@@ -302,8 +302,8 @@ function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_fil
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
     tform_output= Vector{ITKTransform}()
     afffile_mat, afffile_txt = output*"0GenericAffine.mat", output*"0GenericAffine.txt"
-    warpfile_mat, warpfile_txt = output*"1Warp.mat", output*"1Warp.txt"
-    invfile_mat, invfile_txt = output*"1InverseWarp.mat", output*"1InverseWarp.txt"
+    warpfile_mat, warpfile_txt = output*"1Warp.nii.gz", output*"1Warp.txt"
+    invfile_mat, invfile_txt = output*"1InverseWarp.nii.gz", output*"1InverseWarp.txt"
     if Global ∈ tformlist
         convertTransformFile(afffile_mat, afffile_txt)
         aff_tform = load_itktform(afffile_txt)
