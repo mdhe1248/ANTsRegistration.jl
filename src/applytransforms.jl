@@ -74,7 +74,7 @@ struct ITKTransform{N}
     tag::AbstractString #Not sure what it means.
     transform::AbstractString
     parameters::NTuple
-    fixedparameters::NTuple{N, Int}
+    fixedparameters::NTuple
 end
 
 struct Tform #Transformation setup for antsApplyTransform
