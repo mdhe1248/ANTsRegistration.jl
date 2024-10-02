@@ -9,7 +9,7 @@ end
 
 function Base.show(io::IO, s::ITKTransform)
 # Define how to print the `id` field
-    print(io, "ITKTransform(version = $(s.version) \n")
+    print(io, "ITKTransform(version = $(s.version), \n")
     print(io, "tag = $(s.tag), \n")
     print(io, "transform = $(s.transform), \n")
 # Condense the description field to the first 50 characters (for example)
