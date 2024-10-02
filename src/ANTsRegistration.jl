@@ -298,7 +298,7 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
     get_itktforms(output, pipeline; save_tform_file = save_tform_file)
 end
 
-function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::bool = true)
+function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::Bool = true)
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
     tform_output= Vector{ITKTransform}()
     afffile_mat, afffile_txt = output*"0GenericAffine.mat", output*"0GenericAffine.txt"
