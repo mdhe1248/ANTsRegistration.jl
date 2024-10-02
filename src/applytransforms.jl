@@ -107,9 +107,9 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     for tform in tforms 
         up = ANTsRegistration.userpath()
         tfmname = joinpath(up, randstring(10)*"_tfm.txt") #transform file name
-        transformFileName = save_itktform(tfmname, tform.transform)
-        cmd = `$cmd -t \[$(transformFileName), $(tform.useInverse)\]`
-        rm(transformFileName)
+        ANTsRegistration.save_itktform(tfmname, tforms[1])
+        cmd = `$cmd -t \[$(tfmname), $(tform.useInverse)\]`
+        rm(tfmname)
     end
     # Other options
     if verbose
