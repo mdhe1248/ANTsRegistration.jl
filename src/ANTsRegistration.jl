@@ -2,7 +2,7 @@ module ANTsRegistration
 
 using Images, Glob, Random, Unitful, Suppressor, DataFrames, CSV
 
-export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage, register1111
+export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage
 export Tform, Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms
 export ITKTransform, convertTransformFile, load_itktform, save_itktform
 
@@ -326,7 +326,6 @@ function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_fil
 end
 
 function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline::AbstractVector{<:Stage}; kwargs...)
-    @info "Images are not saved on the disk"
     maskfile = ""
     if any(isnan, fixed)
         # Create a mask
@@ -345,22 +344,12 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
     up = userpath()
     outname = randstring(10)
     tfmname = joinpath(up, outname*"_warp")
-    #warpedname = joinpath(up, outname*".nrrd")
-    #output = (tfmname, warpedname) #FIXME
     if isa(kwargs, NamedTuple)
         kwargs = merge(kwargs, (save_tform_file = false,)) #Forcefully `set save_tform_file = false`
     else
         kwargs = (save_tform_file = false,)
     end
     tforms = register(tfmname, fixed, moving, pipeline; kwargs...)
-#    imgw = load(warpedname) #FIXME This needs apply transformation needed
-#    rm(warpedname) #FIXME these are removed from return_tforms
-#    for tfmfile in glob(outname*"_warp"*"*.mat", up)
-#        rm(tfmfile)
-#    end
-#    for tfmfile in glob(outname*"_warp"*"*.nii.gz", up)
-#        rm(tfmfile)
-#    end
     return tforms
 end
 
