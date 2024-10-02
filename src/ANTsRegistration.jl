@@ -249,7 +249,16 @@ end
 #    end
 #end
 
-function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, initial_moving_transform = missing, initial_fixed_transform = missing, seed=nothing, verbose::Bool=false, suppressout::Bool=true)
+"""
+`fixed` and `moving` are image files in in HDD.
+The output warped image is also stored in the hard drive.
+e.g.)
+
+tforms = register(output, nd, fixedname, movingname, pipeline; kwargs...)
+
+By default, it returns ITKTransform. See `load_itktform` and `save_itktform`.
+"""
+function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, initial_moving_transform = missing, initial_fixed_transform = missing, seed=nothing, verbose::Bool=false, suppressout::Bool=true, save_tform_file::Bool=true)
     cmd = `antsRegistration -d $nd`
     if verbose
         cmd = `$cmd -v 1`
@@ -286,40 +295,38 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
     else
         run(cmd)
     end
-    return_tforms(output, pipeline)
+    get_itktforms(output, pipeline; save_tform_file = save_tform_file)
 end
 
-function return_tforms(output, pipeline::AbstractVector{<:Stage})
+function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::bool = true)
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
     tform_output= Vector{ITKTransform}()
+    afffile_mat, afffile_txt = output*"0GenericAffine.mat", output*"0GenericAffine.txt"
+    warpfile_mat, warpfile_txt = output*"1Warp.mat", output*"1Warp.txt"
+    invfile_mat, invfile_txt = output*"1InverseWarp.mat", output*"1InverseWarp.txt"
     if Global ∈ tformlist
-        aff_tempfile = tempname()*".txt"
-        afffile = string(output*"0GenericAffine.mat")
-        convertTransformFile(afffile, aff_tempfile)
-        aff_tform = load_itktform(aff_tempfile)
+        convertTransformFile(afffile_mat, afffile_txt)
+        aff_tform = load_itktform(afffile_txt)
         push!(tform_output, aff_tform)
-        rm(aff_tempfile)
     end
     if SyN ∈ tformlist
         # warp transformation
-        warp_tempfile= tempname()*".txt"
-        warpfile = string(output*"1Warp.nii.gz")
-        convertTransformFile(warpfile, warp_tempfile)
-        warp_tform = load_itktform(warp_tempfile)
+        convertTransformFile(warpfile_mat, warpfile_txt)
+        warp_tform = load_itktform(warpfile_txt)
         push!(tform_output, warp_tform)
-        rm(warp_tempfile)
         # inversewarp transformation
-        inv_tempfile = tempname()*".txt"
-        invfile = string(output*"1InverseWarp.nii.gz")
-        convertTransformFile(invfile, inv_tempfile)
-        inv_tform = load_itktform(inv_tempfile)
+        convertTransformFile(invfile_mat, invfile_txt)
+        inv_tform = load_itktform(invfile_txt)
         push!(tform_output, inv_tform)
-        rm(inv_tempfile)
+    end
+    if !save_tform_file
+        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, afffile_txt, warpfile_mat, warpfile_txt, invfile_mat, innfile_txt)]
     end
     tform_output
 end
 
 function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline::AbstractVector{<:Stage}; kwargs...)
+    @info "Images are not saved on the disk"
     maskfile = ""
     if any(isnan, fixed)
         # Create a mask
@@ -327,20 +334,22 @@ function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline:
     end
     fixedname = write_nrrd(fixed)
     movingname = write_nrrd(moving)
-    tforms = register(output, sdims(fixed), fixedname, movingname, pipeline; kwargs...)
+    tforms = register(output, sdims(fixed), fixedname, movingname, pipeline; kwargs...) #This still creates transformation files.
     rm(movingname)
     rm(fixedname)
     return tforms
 end
 
 function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage}; kwargs...)
+    @info "`save_tform_file` is forcefully set to be false. Transform files are not saved on the disk."
     up = userpath()
     outname = randstring(10)
     tfmname = joinpath(up, outname*"_warp")
-    warpedname = joinpath(up, outname*".nrrd")
-    output = (tfmname, warpedname)
+    #warpedname = joinpath(up, outname*".nrrd")
+    output = (tfmname, warpedname) #FIXME
+    kwargs = merge(kwargs, (save_tform_file = false,))
     tforms = register(output, fixed, moving, pipeline; kwargs...)
-    imgw = load(warpedname)
+#    imgw = load(warpedname) #FIXME This needs apply transformation needed
 #    rm(warpedname) #FIXME these are removed from return_tforms
 #    for tfmfile in glob(outname*"_warp"*"*.mat", up)
 #        rm(tfmfile)
@@ -348,7 +357,7 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
 #    for tfmfile in glob(outname*"_warp"*"*.nii.gz", up)
 #        rm(tfmfile)
 #    end
-    return (imgw, tforms)
+    return tforms
 end
 
 register(output, fixed::AbstractArray, moving, pipeline::Stage; kwargs...) =
