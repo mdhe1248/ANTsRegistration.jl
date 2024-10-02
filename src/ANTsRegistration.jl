@@ -346,9 +346,9 @@ function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage
     outname = randstring(10)
     tfmname = joinpath(up, outname*"_warp")
     #warpedname = joinpath(up, outname*".nrrd")
-    output = (tfmname, warpedname) #FIXME
-    kwargs = merge(kwargs, (save_tform_file = false,))
-    tforms = register(output, fixed, moving, pipeline; kwargs...)
+    #output = (tfmname, warpedname) #FIXME
+    kwargs = merge(kwargs, (save_tform_file = false,)) #Forcefully `set save_tform_file = false`
+    tforms = register(tfmname, fixed, moving, pipeline; kwargs...)
 #    imgw = load(warpedname) #FIXME This needs apply transformation needed
 #    rm(warpedname) #FIXME these are removed from return_tforms
 #    for tfmfile in glob(outname*"_warp"*"*.mat", up)
