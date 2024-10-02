@@ -320,7 +320,7 @@ function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_fil
         push!(tform_output, inv_tform)
     end
     if !save_tform_file
-        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, afffile_txt, warpfile_mat, warpfile_txt, invfile_mat, innfile_txt)]
+        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, afffile_txt, warpfile_mat, warpfile_txt, invfile_mat, invfile_txt)]
     end
     tform_output
 end
