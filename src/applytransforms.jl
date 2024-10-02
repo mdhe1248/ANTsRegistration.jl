@@ -68,7 +68,7 @@ GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
 #end
 #Tform(transformFileName) = Tform(transformFileName, 0)
 
-struct ITKTransform{N}
+struct ITKTransform
     #mode::AbstractString FIXME 
     version::AbstractString
     tag::AbstractString #Not sure what it means.
