@@ -74,7 +74,7 @@ struct ITKTransform
     tag::AbstractString #Not sure what it means.
     transform::AbstractString
     parameters::NTuple
-    fixedparameters::NTuple
+    fixedparameters::NTuple{Int}
 end
 
 struct Tform #Transformation setup for antsApplyTransform
@@ -107,7 +107,7 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     for tform in tforms 
         up = ANTsRegistration.userpath()
         tfmname = joinpath(up, randstring(10)*"_tfm.txt") #transform file name
-        ANTsRegistration.save_itktform(tfmname, tform.transform)
+        ANTsRegistration.save_itktform(tfmname, tfms[1].transform)
         cmd = `$cmd -t \[$(tfmname), $(tform.useInverse)\]`
         rm(tfmname)
     end
