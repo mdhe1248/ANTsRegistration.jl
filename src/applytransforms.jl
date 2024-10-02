@@ -62,11 +62,19 @@ GenericLabel() = GenericLabel("GenericLabel", "Linear")
 GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
 
 #### Transformation
+#struct Tform
+#    transformFileName::AbstractString
+#    useInverse::Int
+#end
+#Tform(transformFileName) = Tform(transformFileName, 0)
+
 struct Tform
-    transformFileName::AbstractString
+    transform::ITKTransform
     useInverse::Int
 end
-Tform(transformFileName) = Tform(transformFileName, 0)
+Tform(transform::ITKTransform) = Tform(transform, 0)
+Tform(transformFileName::AbstractString) = Tform(load_itktform(transformFileName))
+Tform(transformFileName::AbstractString, useInverse) = Tform(load_itktform(transformFileName), useInverse)
 
 #### Point
 struct Point
@@ -88,7 +96,11 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     end
     # Add transformations
     for tform in tforms 
-        cmd = `$cmd -t \[$(tform.transformFileName), $(tform.useInverse)\]`
+        up = ANTsRegistration.userpath()
+        tfmname = joinpath(up, randstring(10)*"_tfm.txt") #transform file name
+        transformFileName = save_itktform(tfmname, tform.transform)
+        cmd = `$cmd -t \[$(transformFileName), $(tform.useInverse)\]`
+        rm(transformFileName)
     end
     # Other options
     if verbose
