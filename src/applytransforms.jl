@@ -139,9 +139,14 @@ get_tempname() = get_tempname("")
 
 #### Apply Transforms to point
 function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, inputFileName::AbstractString; precision::Bool = false)
+    tfmnames = get_tempname(length(tforms), "_tfm.txt")
     cmd = `antsApplyTransformsToPoints -o $outputFileName -d $nd -i $inputFileName`
     if precision
         cmd = `$cmd --precision 1`
+    end
+    for tform in tfmnames
+        save_itktform(tfmnames[i], tform.transform)
+        cmd = `$cmd -t \[$(tfmnames[i]), $(tform.useInverse)\]`
     end
 end
 
