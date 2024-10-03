@@ -94,6 +94,8 @@ struct Point
 end
 
 function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referenceFileName::AbstractString, inputFileName::AbstractString; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
+    up = ANTsRegistration.userpath()
+    tfmname = joinpath(up, randstring(10)*"_tfm.txt") #transform file name
     cmd = `antsApplyTransforms -o $outputFileName -d $nd -r $referenceFileName -i $inputFileName --input-image-type $input_imagetype --output-data-type $output_datatype`
     # Add interpolation method
     if any(x -> isa(interpolation, x), [Linear, NearestNeighbor, CosineWindowedSinc, WelchWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc])  
@@ -105,8 +107,6 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     end
     # Add transformations
     for tform in tforms 
-        up = ANTsRegistration.userpath()
-        tfmname = joinpath(up, randstring(10)*"_tfm.txt") #transform file name
         ANTsRegistration.save_itktform(tfmname, tform.transform)
         cmd = `$cmd -t \[$(tfmname), $(tform.useInverse)\]`
     end
