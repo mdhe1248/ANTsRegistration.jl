@@ -136,7 +136,7 @@ get_tempname(noutputs::Int, tag::AbstractString) = [get_tempname(tag) for i in 1
 get_tempname(noutputs::Int) = [get_tempname() for i in 1:noutputs]
 get_tempname() = get_tempname("")
 
-function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
+function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
     refimg = write_nrrd(reference);
     inputimg = write_nrrd(input);
     applyTransforms(outputFileName, sdims(reference), tforms, refimg, inputimg; kwargs...)
@@ -144,7 +144,7 @@ function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::Abstr
     rm(inputimg)
 end
 
-function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
+function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
     outputFileName = get_tempname(length(tforms), "_warp.nrrd")
     refimg = write_nrrd(reference);
     inputimg = write_nrrd(input);
