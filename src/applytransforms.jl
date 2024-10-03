@@ -83,7 +83,7 @@ struct Tform #Transformation setup for antsApplyTransform
 end
 Tform(transform::ITKTransform) = Tform(transform, 0)
 Tform(transformFileName::AbstractString) = Tform(load_itktform(transformFileName))
-Tform(transformFileName::AbstractString, useInverse) = Tform(load_itktform(transformFileName), useInverse)
+Tform(transformFileName::AbstractString, useInverse::Int) = Tform(load_itktform(transformFileName), useInverse)
 
 #### Point
 struct Point
@@ -94,8 +94,7 @@ struct Point
 end
 
 function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referenceFileName::AbstractString, inputFileName::AbstractString; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
-    up = userpath()
-    tfmnames = [joinpath(up, randstring(10)*"_tfm.txt") for i in tforms] #temporary transform file names
+    tfmnames = get_tempname(length(tforms), "_tfm.txt");
     cmd = `antsApplyTransforms -o $outputFileName -d $nd -r $referenceFileName -i $inputFileName --input-image-type $input_imagetype --output-data-type $output_datatype`
     # Add interpolation method
     if any(x -> isa(interpolation, x), [Linear, NearestNeighbor, CosineWindowedSinc, WelchWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc])  
@@ -136,6 +135,24 @@ end
 get_tempname(noutputs::Int, tag::AbstractString) = [get_tempname(tag) for i in 1:noutputs]
 get_tempname(noutputs::Int) = [get_tempname() for i in 1:noutputs]
 get_tempname() = get_tempname("")
+
+function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
+    refimg = write_nrrd(reference);
+    inputimg = write_nrrd(input);
+    applyTransforms(outputFileName, sdims(reference), tforms, refimg, inputimg; kwargs...)
+    rm(refimg)
+    rm(inputimg)
+end
+
+function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
+    outputFileName = get_tempname(length(tforms), "_warp.nrrd")
+    refimg = write_nrrd(reference);
+    inputimg = write_nrrd(input);
+    applyTransforms(outputFileName, sdims(reference), tforms, refimg, inputimg; kwargs...)
+    rm(refimg)
+    rm(inputimg)
+    rm(outputFileName)
+end
 
 #### Apply Transforms to point
 function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, inputFileName::AbstractString; precision::Bool = false)
