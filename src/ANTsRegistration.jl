@@ -249,6 +249,33 @@ end
 #    end
 #end
 
+function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::Bool = true)
+    tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
+    tform_output= Vector{ITKTransform}()
+    afffile_mat, afffile_txt = output*"0GenericAffine.mat", output*"0GenericAffine.txt"
+    warpfile_mat, warpfile_txt = output*"1Warp.nii.gz", output*"1Warp.txt"
+    invfile_mat, invfile_txt = output*"1InverseWarp.nii.gz", output*"1InverseWarp.txt"
+    if Global ∈ tformlist
+        convertTransformFile(afffile_mat, afffile_txt)
+        aff_tform = load_itktform(afffile_txt)
+        push!(tform_output, aff_tform)
+    end
+    if SyN ∈ tformlist
+        # warp transformation
+        convertTransformFile(warpfile_mat, warpfile_txt)
+        warp_tform = load_itktform(warpfile_txt)
+        push!(tform_output, warp_tform)
+        # inversewarp transformation
+        convertTransformFile(invfile_mat, invfile_txt)
+        inv_tform = load_itktform(invfile_txt)
+        push!(tform_output, inv_tform)
+    end
+    if !save_tform_file
+        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, afffile_txt, warpfile_mat, warpfile_txt, invfile_mat, invfile_txt)]
+    end
+    tform_output
+end
+
 """
 `fixed` and `moving` are image files in in HDD.
 The output warped image is also stored in the hard drive.
@@ -296,33 +323,6 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
         run(cmd)
     end
     get_itktforms(output, pipeline; save_tform_file = save_tform_file)
-end
-
-function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::Bool = true)
-    tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
-    tform_output= Vector{ITKTransform}()
-    afffile_mat, afffile_txt = output*"0GenericAffine.mat", output*"0GenericAffine.txt"
-    warpfile_mat, warpfile_txt = output*"1Warp.nii.gz", output*"1Warp.txt"
-    invfile_mat, invfile_txt = output*"1InverseWarp.nii.gz", output*"1InverseWarp.txt"
-    if Global ∈ tformlist
-        convertTransformFile(afffile_mat, afffile_txt)
-        aff_tform = load_itktform(afffile_txt)
-        push!(tform_output, aff_tform)
-    end
-    if SyN ∈ tformlist
-        # warp transformation
-        convertTransformFile(warpfile_mat, warpfile_txt)
-        warp_tform = load_itktform(warpfile_txt)
-        push!(tform_output, warp_tform)
-        # inversewarp transformation
-        convertTransformFile(invfile_mat, invfile_txt)
-        inv_tform = load_itktform(invfile_txt)
-        push!(tform_output, inv_tform)
-    end
-    if !save_tform_file
-        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, afffile_txt, warpfile_mat, warpfile_txt, invfile_mat, invfile_txt)]
-    end
-    tform_output
 end
 
 function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline::AbstractVector{<:Stage}; kwargs...)
