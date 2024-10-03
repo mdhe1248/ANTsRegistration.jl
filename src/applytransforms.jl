@@ -94,8 +94,8 @@ struct Point
 end
 
 function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referenceFileName::AbstractString, inputFileName::AbstractString; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
-    up = ANTsRegistration.userpath()
-    tfmname = joinpath(up, randstring(10)*"_tfm.txt") #transform file name
+    up = userpath()
+    tfmnames = [joinpath(up, randstring(10)*"_tfm.txt") for i in tforms] #temporary transform file names
     cmd = `antsApplyTransforms -o $outputFileName -d $nd -r $referenceFileName -i $inputFileName --input-image-type $input_imagetype --output-data-type $output_datatype`
     # Add interpolation method
     if any(x -> isa(interpolation, x), [Linear, NearestNeighbor, CosineWindowedSinc, WelchWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc])  
@@ -106,9 +106,9 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
         cmd = `$cmd -n \[$(interpolation.mode), $(interpolation.order)\]`
     end
     # Add transformations
-    for tform in tforms 
-        ANTsRegistration.save_itktform(tfmname, tform.transform)
-        cmd = `$cmd -t \[$(tfmname), $(tform.useInverse)\]`
+    for (i, tform) in enumerate(tforms)
+        save_itktform(tfmnames[i], tform.transform)
+        cmd = `$cmd -t \[$(tfmnames[i]), $(tform.useInverse)\]`
     end
     # Other options
     if verbose
@@ -126,7 +126,7 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     else
         run(cmd)
     end
-    rm(tfmname)
+    rm.(tfmnames)
 end
 
 #### Apply Transforms to point
