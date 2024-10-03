@@ -341,8 +341,7 @@ end
 
 function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage}; kwargs...)
     @info "`save_tform_file` is forcefully set to be false. Transform files are not saved on the disk."
-    up = userpath()
-    outname = joinpath(up, randstring(10))
+    outname = joinpath(userpath(), randstring(10))
     if isa(kwargs, NamedTuple)
         kwargs = merge(kwargs, (save_tform_file = false,)) #Forcefully `set save_tform_file = false`
     else
