@@ -136,7 +136,6 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     rm.(tfmnames)
 end
 
-
 function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
     refimg = write_nrrd(reference);
     inputimg = write_nrrd(input);
@@ -146,13 +145,15 @@ function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::Abstr
 end
 
 function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
-    outputFileName = get_tempname(length(tforms), "_warp.nrrd")
+    outputFileName = get_tempname(1, "_warp.nrrd")[1]
     refimg = write_nrrd(reference);
     inputimg = write_nrrd(input);
     applyTransforms(outputFileName, sdims(reference), tforms, refimg, inputimg; kwargs...)
+    imgw = load(outputFileName)
     rm(refimg)
     rm(inputimg)
     rm(outputFileName)
+    return imgw
 end
 
 #### Apply Transforms to point
