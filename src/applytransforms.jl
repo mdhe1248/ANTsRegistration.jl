@@ -129,6 +129,14 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     rm.(tfmnames)
 end
 
+function get_tempname(tag::AbstractString)
+    tfmname = joinpath(userpath(), randstring(10)*tag) #temporary transform file names
+    return tfmname
+end
+get_tempname(noutputs::Int, tag::AbstractString) = [get_tempname(tag) for i in 1:noutputs]
+get_tempname(noutputs::Int) = [get_tempname() for i in 1:noutputs]
+get_tempname() = get_tempname("")
+
 #### Apply Transforms to point
 function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, inputFileName::AbstractString; precision::Bool = false)
     cmd = `antsApplyTransformsToPoints -o $outputFileName -d $nd -i $inputFileName`
