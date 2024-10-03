@@ -93,6 +93,14 @@ struct Point
     t::Number
 end
 
+function get_tempname(tag::AbstractString)
+    tfmname = joinpath(userpath(), randstring(10)*tag) #temporary transform file names
+    return tfmname
+end
+get_tempname(noutputs::Int, tag::AbstractString) = [get_tempname(tag) for i in 1:noutputs]
+get_tempname(noutputs::Int) = [get_tempname() for i in 1:noutputs]
+get_tempname() = get_tempname("")
+
 function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referenceFileName::AbstractString, inputFileName::AbstractString; interpolation::AbstractAntsInterpolation = Linear(), input_imagetype = 0, output_datatype = "default", float::Bool = false, default_value = missing, verbose::Bool=false, suppressout::Bool=true)
     tfmnames = get_tempname(length(tforms), "_tfm.txt");
     cmd = `antsApplyTransforms -o $outputFileName -d $nd -r $referenceFileName -i $inputFileName --input-image-type $input_imagetype --output-data-type $output_datatype`
@@ -128,13 +136,6 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     rm.(tfmnames)
 end
 
-function get_tempname(tag::AbstractString)
-    tfmname = joinpath(userpath(), randstring(10)*tag) #temporary transform file names
-    return tfmname
-end
-get_tempname(noutputs::Int, tag::AbstractString) = [get_tempname(tag) for i in 1:noutputs]
-get_tempname(noutputs::Int) = [get_tempname() for i in 1:noutputs]
-get_tempname() = get_tempname("")
 
 function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
     refimg = write_nrrd(reference);
