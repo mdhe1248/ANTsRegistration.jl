@@ -304,15 +304,11 @@ function register(output, fixed::AbstractArray, moving::AbstractArray, pipeline:
     return tforms
 end
 
-function register(fixed::AbstractArray, moving, pipeline::AbstractVector{<:Stage}; kwargs...)
+function register(fixed::AbstractArray, moving::AbstractArray, pipeline::AbstractVector{<:Stage}; kwargs...)
     @info "`save_tform_file` is forcefully set to be false. Transform files are not saved on the disk."
-    outname = joinpath(userpath(), randstring(10))
-    if isa(kwargs, NamedTuple)
-        kwargs = merge(kwargs, (save_tform_file = false,)) #Forcefully `set save_tform_file = false`
-    else
-        kwargs = (save_tform_file = false,)
-    end
-    tforms = register(outname, fixed, moving, pipeline; kwargs...)
+    outname = joinpath(ANTsRegistration.userpath(), randstring(10))
+    kwargs = merge(Dict{Symbol, Any}(:save_tform_file => false), kwargs)
+    tforms = ANTsRegistration.register(outname, fixed, moving, pipeline; kwargs...)
     #Remove temporary transformation files.
     tfmnames = [outname*"0GenericAffine.mat", outname*"1Warp.nii.gz", outname*"1InverseWarp.nii.gz"]
     [isfile(tfmname) ? rm(tfmname) : nothing for tfmname in tfmnames]
