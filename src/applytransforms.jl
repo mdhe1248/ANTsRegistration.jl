@@ -145,7 +145,7 @@ function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::Abstr
 end
 
 function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
-    outputFileName = get_tempname("_warp.nrrd")[1]
+    outputFileName = get_tempname("_warp.nrrd")
     refimg = write_nrrd(reference);
     inputimg = write_nrrd(input);
     applyTransforms(outputFileName, sdims(reference), tforms, refimg, inputimg; kwargs...)
