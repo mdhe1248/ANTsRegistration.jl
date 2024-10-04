@@ -210,45 +210,6 @@ function default_convergence(sz::Dims, transform::SyN)
     return islarge ? ((100,100,70,50,0), 1e-6, 10) : ((100,70,50,0), 1e-6, 10)
 end
 
-#function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, initial_moving_transform = missing, initial_fixed_transform = missing, seed=nothing, verbose::Bool=false, suppressout::Bool=true)
-#    cmd = `antsRegistration -d $nd`
-#    if verbose
-#        cmd = `$cmd -v 1`
-#    end
-#    if histmatch
-#        cmd = `$cmd --use-histogram-matching`
-#    end
-#    if isa(winsorize, Tuple{Real,Real})
-#        cmd = `$cmd --winsorize-image-intensities \[$(winsorize[1]),$(winsorize[2])\]`
-#    end
-#    if isa(seed, Int)
-#        cmd = `$cmd --random-seed $seed`
-#    end
-#    if isa(initial_moving_transform, Tform)
-#        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
-#    elseif isa(initial_moving_transform, NTuple)
-#        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform[1]), $(initial_moving_tform[2]), $(initial_moving_tform[3])\]`
-#    end
-#    if isa(initial_fixed_transform, Tform)
-#        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
-#    elseif isa(initial_fixed_transform, NTuple)
-#        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform[1]), $(initial_fixed_tform[2]), $(initial_fixed_tform[3])\]`
-#    end
-#    for pipe in pipeline
-#        cmd = shcmd(cmd, pipe, fixedname, movingname)
-#    end
-#    cmd = `$cmd --output `
-#    cmd = shcmd(cmd, output)
-#    if verbose
-#        @show cmd
-#    end
-#    if suppressout
-#        @suppress_out run(cmd)
-#    else
-#        run(cmd)
-#    end
-#end
-
 function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::Bool = true)
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
     tform_output= Vector{ITKTransform}()
