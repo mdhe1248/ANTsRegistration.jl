@@ -241,13 +241,14 @@ function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_fil
 end
 
 """
-`fixed` and `moving` are image files in in HDD.
-The output warped image is also stored in the hard drive.
+`fixed` and `moving` are image files in the hard drive.
+`nd` is the dimension of the image (mostly 2 or 3).
+`output` is a prefix for the output transform file.
 e.g.)
 
 tforms = register(output, nd, fixedname, movingname, pipeline; kwargs...)
 
-By default, it returns ITKTransform. See `load_itktform` and `save_itktform`.
+By default, it also stores the output transform file in the hard drive.
 """
 function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; histmatch::Bool=false, winsorize=nothing, initial_moving_transform = missing, initial_fixed_transform = missing, seed=nothing, verbose::Bool=false, suppressout::Bool=true, save_tform_file::Bool=true)
     cmd = `antsRegistration -d $nd`
