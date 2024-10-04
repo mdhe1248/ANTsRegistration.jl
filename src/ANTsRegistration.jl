@@ -220,19 +220,22 @@ function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_fil
         convertTransformFile(afffile_mat, afffile_txt)
         aff_tform = load_itktform(afffile_txt)
         push!(tform_output, aff_tform)
+        rm(afffile_txt)
     end
     if SyN ∈ tformlist
         # warp transformation
         convertTransformFile(warpfile_mat, warpfile_txt)
         warp_tform = load_itktform(warpfile_txt)
         push!(tform_output, warp_tform)
+        rm(warpfile_txt)
         # inversewarp transformation
         convertTransformFile(invfile_mat, invfile_txt)
         inv_tform = load_itktform(invfile_txt)
         push!(tform_output, inv_tform)
+        rm(ivfile_txt)
     end
     if !save_tform_file
-        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, afffile_txt, warpfile_mat, warpfile_txt, invfile_mat, invfile_txt)]
+        [isfile(file) ? rm(file) : nothing for file in (afffile_mat, warpfile_mat, invfile_mat)]
     end
     tform_output
 end
