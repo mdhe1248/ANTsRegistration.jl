@@ -232,7 +232,7 @@ function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_fil
         convertTransformFile(invfile_mat, invfile_txt)
         inv_tform = load_itktform(invfile_txt)
         push!(tform_output, inv_tform)
-        rm(ivfile_txt)
+        rm(invfile_txt)
     end
     if !save_tform_file
         [isfile(file) ? rm(file) : nothing for file in (afffile_mat, warpfile_mat, invfile_mat)]
