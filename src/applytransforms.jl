@@ -164,7 +164,6 @@ function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input:
     return imgw
 end
 
-#### Apply Transforms to point
 function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, inputFileName::AbstractString; precision::Bool = false)
     tfmnames = get_tempname(length(tforms), "_tfm.txt")
     cmd = `antsApplyTransformsToPoints -o $outputFileName -d $nd -i $inputFileName`
@@ -179,7 +178,7 @@ function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms
 end
 
 function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
-    tmpinputname = tempname()*".csv"
+    tmpinputname = get_tempname("_point.csv")
     CSV.write(tmpinputname, points)
     applyTransformsToPoints(outputFileName, nd, tforms, tmpinputname; precision = precision)
     df_tformed = CSV.read(outputFileName, DataFrame)
@@ -199,7 +198,7 @@ function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms
 end
 
 function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
-    tmpoutname = tempname()*".csv"
+    tmpoutname = get_tempname("_point.csv")
     df_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, points; precision = precision)
     rm(tmpoutname)
     return df_tformed
