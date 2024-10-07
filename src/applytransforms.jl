@@ -62,7 +62,7 @@ GenericLabel() = GenericLabel("GenericLabel", "Linear")
 GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
 
 struct ITKTransform
-    #mode::AbstractString FIXME 
+    mode::AbstractString FIXME 
     version::AbstractString
     tag::AbstractString #Not sure what it means.
     transform::AbstractString
