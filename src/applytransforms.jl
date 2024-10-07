@@ -61,10 +61,11 @@ end
 GenericLabel() = GenericLabel("GenericLabel", "Linear")
 GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
 
+"""ITKTransform struct."""
 struct ITKTransform
     mode::AbstractString
     version::AbstractString
-    tag::AbstractString #Not sure what it means.
+    tag::AbstractString #Not sure what it means in ANTs.
     transform::AbstractString
     parameters::NTuple
     fixedparameters::NTuple
