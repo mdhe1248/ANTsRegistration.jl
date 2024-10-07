@@ -144,6 +144,14 @@ function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::Abstr
     rm(inputimg)
 end
 
+""" Apply Transforms to an image and returns a transformed image.
+
+`tforms` is a vector of `Tform`. This requires ITKTransform, most likely obtained from the `register` function.
+A `reference` image defines spacing, origin, size, and the direction of the output warped image.
+Transformation is applied to an `input` image.
+
+See antsApplyTransforms.
+"""
 function applyTransforms(tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
     outputFileName = get_tempname("_warp.nrrd")
     refimg = write_nrrd(reference);
@@ -197,6 +205,13 @@ function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFra
     return df_tformed
 end
 
+"""Apply Transforms to point
+`nd` is dimensionality (2/3/4).
+`tforms` is a vector of `Tform`. `Tform` requires `ITKTransform`, most likely obtained from the `register` function.
+`points` are a vector of `Point` with x, y, z, and t. Instead of `Point`, a data frame also works.
+
+See `antsApplyTransformsToPoint` from ANTs.
+"""
 function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
     tmpoutname = tempname()*".csv"
     points_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, points; precision = precision)
