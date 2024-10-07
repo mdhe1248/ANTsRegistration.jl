@@ -212,7 +212,7 @@ end
 See `antsApplyTransformsToPoint` from ANTs.
 """
 function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
-    tmpoutname = tempname()*".csv"
+    tmpoutname = get_tempname("_point.csv")
     points_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, points; precision = precision)
     rm(tmpoutname)
     return points_tformed
