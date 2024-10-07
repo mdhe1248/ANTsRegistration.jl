@@ -1,5 +1,6 @@
 function Base.show(io::IO, s::ITKTransform)
 # Define how to print the `id` field
+    print(io, "ITKTransform(mode = $(s.mode), \n")
     print(io, "ITKTransform(version = $(s.version), \n")
     print(io, "tag = $(s.tag), \n")
     print(io, "transform = $(s.transform), \n")
@@ -21,19 +22,35 @@ function convertTransformFile(tformfile::AbstractString, outputtxtfile::Abstract
 end
 
 """ Load itk transform text file as a struct"""
-function load_itktform(tformtxtfile::AbstractString)
+function load_itktform(mode::AbstractString, tformtxtfile::AbstractString)
+    if !isfile(tformtxtfile)
+        @error "File does not exist"
+    end
     lines = Vector{AbstractString}()
     open(tformtxtfile) do file
         for ln in eachline(file)
             push!(lines, ln)
         end
     end
-    itktform_textlines2struct(lines)
+    itktform_textlines2struct(mode, lines)
+end
+function load_itktform(tformtxtfile::AbstractString)
+    if occursin("Affine", tformtxtfile)
+        mode = "0GenericAffine."
+    elseif occursin("1Warp.", tformtxtfile)
+        mode = "Warp"
+    elseif occursin("1InverseWarp.", tformtxtfile)
+        mode = "InverseWarp"
+    else
+        @error "`mode` is unclear"
+    end
+    load_itktform(mode, tformtxtfile)
 end
 
-function itktform_textlines2struct(lines)
+function itktform_textlines2struct(mode, lines)
     if isequal(lines[1], "#Insight Transform File V1.0") #Check file version
-        ITKTransform(lines[1],
+        ITKTransform(mode,
+                     lines[1],
                      lines[2], 
                      lines[3][(findfirst(':', lines[3])+2):end],
                      Tuple(parse.(Float64, split(lines[4][(findfirst(':', lines[4])+2):end]))),
