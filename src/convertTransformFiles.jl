@@ -35,8 +35,8 @@ function load_itktform(mode::AbstractString, tformtxtfile::AbstractString)
     itktform_textlines2struct(mode, lines)
 end
 function load_itktform(tformtxtfile::AbstractString)
-    if occursin("Affine", tformtxtfile)
-        mode = "0GenericAffine."
+    if occursin("0GenericAffine.", tformtxtfile)
+        mode = "GenericAffine"
     elseif occursin("1Warp.", tformtxtfile)
         mode = "Warp"
     elseif occursin("1InverseWarp.", tformtxtfile)
