@@ -1,43 +1,31 @@
+using ANTsRegistration
 using TestImages
 using Images
 using ImageView
-using NRRD
 
 #### Prepare test images
 img = testimage("cameraman")
 θ = deg2rad(15)
 rot = imrotate(img, θ, center = true, axes(img))
-imshow(rot);
-save("testimg.nrrd", img)
-save("testimgrot.nrrd", rot)
 
-#### AntsRegistration
-output = "TEST"
-nd = 2
-fixedname = "testimg.nrrd"
-movingname = "testimgrot.nrrd"
-pipeline= [Stage(Global("Rigid"), MI(), (8,4,2), (3,2,1), (100,50,25), 1e-6, 10), 
-           Stage(SyN(), MI(), (8,4,2), (3,2,1), (100,50,25), 1e-6, 10)]
-register(output, nd, fixedname, movingname, pipeline; verbose = true, suppressout = false)
+# Pipeline
+pipeline= [Stage(Global("Rigid"), MI(), (8,4,2), (3,2,1), (100,50,25), 1e-6, 10),
+           Stage(Global("Affine"), MI(), (8,4,2), (3,2,1), (100,50,25), 1e-6, 10),
+           Stage(SyN(), MI(), (4,2,1), (3,2,1), (30,30,20), 1e-6, 10)]
 
-#### Run ants registration
-outputname = "testwarp.nrrd"
-aff_filename= output*"0GenericAffine.mat"
-warp_filename = output*"1Warp.nii.gz"
-fixedname = "testimg.nrrd"
-movingname = "testimgrot.nrrd"
-tfms = [Tform(warp_filename), Tform(aff_filename)]
-applyTransforms(outputname, 2, tfms, fixedname, movingname; verbose = true, suppressout = false)
-imgw = load(outputname)
-imshow(imgw);
+# Registration
+tforms = register(img, rot, pipeline; seed = 1234)
 
-#### Run antsApplyTransforms
-invoutputname = "testinvwarp.nrrd"
-warpinv_filename = output*"1InverseWarp.nii.gz"
-movingname = "testwarp.nrrd"
-tfms = [Tform(aff_filename, 1), Tform(warpinv_filename)]
-applyTransformation(invoutputname, 2, tfms, fixedname, movingname; verbose = true, suppressout = false)
-imginvw = load(invoutputname)
-imshow(imginvw);
+# Transformation
+tfms = [Tform(tforms[2]), Tform(tforms[1])]
+imgw = applyTransforms(tfms, img, rot)
+imshow(imgw)
 
+# Inverse transformation
+invtfms = [Tform(tforms[1], 1), Tform(tforms[3])]
+imginv = applyTransforms(invtfms, img, imgw; verbose = true, suppressout = false) #FIXME
+imshow(imginv)
 
+# Apply transform to points
+p = [Point(490,140,1,1), Point(259,407,1,1), Point(112, 173, 1, 1)]
+pout = applyTransformsToPoints("test.csv", 2, invtfms, p)
