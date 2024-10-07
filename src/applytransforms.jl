@@ -163,25 +163,35 @@ function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms
     run(cmd)
 end
 
-function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
+function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
     tmpinputname = tempname()*".csv"
-    tmpoutname = tempname()*".csv"
     CSV.write(tmpinputname, points)
-    applyTransformsToPoints(tmpoutname, nd, tforms, tmpinputname; precision = precision)
-    df_tformed = CSV.read(tmpoutname, DataFrame)
+    applyTransformsToPoints(outputFileName, nd, tforms, tmpinputname; precision = precision)
+    df_tformed = CSV.read(outputFileName, DataFrame)
     rm(tmpinputname)
-    rm(tmpoutname)
     return df_tformed
 end
 
-function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
+function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
     x = map(p -> p.x, points)
     y = map(p -> p.y, points)
     z = map(p -> p.z, points)
     t = map(p -> p.t, points)
     df = DataFrame(x = x, y = y, z = z, t = t) #Make data frames
-    df_tformed = applyTransformsToPoints(nd, tforms, df; precision = precision)
+    df_tformed = applyTransformsToPoints(outputFileName, nd, tforms, df; precision = precision)
     points_tformed = map(p -> Point(p...), zip(df_tformed.x, df_tformed.y, df_tformed.z, df_tformed.t))
+    return points_tformed 
+end
+
+function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
+    tmpoutname = tempname()*".csv"
+    df_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, points; precision = precision)
+    return df_tformed
+end
+
+function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
+    tmpoutname = tempname()*".csv"
+    points_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, df; precision = precision)
     return points_tformed
 end
 
