@@ -71,7 +71,8 @@ struct ITKTransform
     fixedparameters::NTuple
 end
 
-struct Tform #Transformation setup for antsApplyTransform
+"""Transformation setup for antsApplyTransform"""
+struct Tform
     transform::ITKTransform
     useInverse::Int
 end
@@ -79,7 +80,11 @@ Tform(transform::ITKTransform) = Tform(transform, 0)
 Tform(transformFileName::AbstractString) = Tform(load_itktform(transformFileName))
 Tform(transformFileName::AbstractString, useInverse::Int) = Tform(load_itktform(transformFileName), useInverse)
 
-#### Point
+"""Point.
+`x` is the row position from `Images.imshow`.
+`y` is the column position from `Images.imshow`.
+If `z` and `t` are not used, set them as 0.
+"""
 struct Point
     x::Number
     y::Number
