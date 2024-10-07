@@ -179,7 +179,7 @@ function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{
     z = map(p -> p.z, points)
     t = map(p -> p.t, points)
     df = DataFrame(x = x, y = y, z = z, t = z) #Make data frames
-    df_tformed = applytTransformsToPoints(nd, tforms, df; precision = precision)
+    df_tformed = applyTransformsToPoints(nd, tforms, df; precision = precision)
     points_tformed = map(p -> Point(p...), zip(df_tformed.x, df_tformed.y, df_tformed.z, df_tformed.t))
     return points_tformed
 end
