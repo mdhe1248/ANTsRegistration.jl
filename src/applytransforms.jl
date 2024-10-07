@@ -134,7 +134,6 @@ function applyTransforms(outputFileName, nd::Int, tforms::Vector{Tform}, referen
     else
         run(cmd)
     end
-#    rm.(tfmnames)
 end
 
 function applyTransforms(outputFileName, tforms::Vector{Tform}, reference::AbstractArray, input::AbstractArray; kwargs...)
