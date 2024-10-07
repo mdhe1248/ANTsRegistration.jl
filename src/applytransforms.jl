@@ -91,6 +91,8 @@ struct Point
     z::Number
     t::Number
 end
+Point(x::Number, y::Number, z::Number) = Point(x, y, z, 0)
+Point(x::Number, y::Number) = Point(x, y, 0, 0)
 
 function get_tempname(tag::AbstractString)
     tfmname = joinpath(userpath(), randstring(10)*tag) #temporary transform file names
