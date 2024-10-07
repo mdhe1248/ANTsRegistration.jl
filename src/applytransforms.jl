@@ -156,7 +156,7 @@ function applyTransformsToPoints(outputFileName::AbstractString, nd::Int, tforms
     if precision
         cmd = `$cmd --precision 1`
     end
-    for tform in tfmnames
+    for (i, tform) in enumerate(tfmnames)
         save_itktform(tfmnames[i], tform.transform)
         cmd = `$cmd -t \[$(tfmnames[i]), $(tform.useInverse)\]`
     end
