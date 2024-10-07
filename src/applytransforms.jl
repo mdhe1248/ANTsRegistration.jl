@@ -61,13 +61,6 @@ end
 GenericLabel() = GenericLabel("GenericLabel", "Linear")
 GenericLabel(interpolator) = GenericLabel("GenericLabel", interpolator)
 
-#### Transformation
-#struct Tform
-#    transformFileName::AbstractString
-#    useInverse::Int
-#end
-#Tform(transformFileName) = Tform(transformFileName, 0)
-
 struct ITKTransform
     #mode::AbstractString FIXME 
     version::AbstractString
