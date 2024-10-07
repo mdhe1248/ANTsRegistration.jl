@@ -186,12 +186,14 @@ end
 function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
     tmpoutname = tempname()*".csv"
     df_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, points; precision = precision)
+    rm(tmpoutname)
     return df_tformed
 end
 
 function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::Vector{Point}; precision::Bool = false)
     tmpoutname = tempname()*".csv"
-    points_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, df; precision = precision)
+    points_tformed = applyTransformsToPoints(tmpoutname, nd, tforms, points; precision = precision)
+    rm(tmpoutname)
     return points_tformed
 end
 
