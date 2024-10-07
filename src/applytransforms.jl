@@ -165,7 +165,7 @@ end
 function applyTransformsToPoints(nd::Int, tforms::Vector{Tform}, points::DataFrame; precision::Bool = false)
     tmpinputname = tempname()*".CSV"
     tmpoutname = tempname()*".CSV"
-    CSV.save(tmpname, points)
+    CSV.write(tmpname, points)
     applyTransformsToPoints(tmpoutname, nd, tforms, tmpinputname; precision = precision)
     df_tformed = CSV.read(tmpoutname, DataFrame)
     rm(tmpinputname)
