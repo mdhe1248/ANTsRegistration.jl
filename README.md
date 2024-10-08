@@ -1,3 +1,9 @@
+Forked from timholy/ANTsRegistration.jl
+- ANTs binary will not be automatically installed.
+- To use this fork, please first install ANTsRegistration on your machine. For installation, the following websites might help:
+https://github.com/ANTsX/ANTs?tab=readme-ov-file, https://github.com/ANTsX/ANTs/releases,  https://github.com/ANTsX/ANTs/wiki/Installing-ANTs-release-binaries
+- `antsApplyTransforms` and `antsApplyTransformsToPoints` functions are added. Please see runtest codes.
+
 # ANTsRegistration
 
 [![Build Status](https://travis-ci.org/timholy/ANTSRegistration.jl.svg?branch=master)](https://travis-ci.org/timholy/ANTSRegistration.jl)
@@ -10,7 +16,7 @@ registration and motion correction suite.
 
 ## Installation
 ```julia
-] add https://github.com/timholy/ANTsRegistration.jl
+] add https://github.com/mdhe1248/ANTsRegistration.jl
 ```
 
 ## Usage
