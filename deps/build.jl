@@ -1,7 +1,7 @@
 using Downloads
 
 # Define the URL of the ANTs binary zip file
-url = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3"
+url = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3/ants-2.5.3-ubuntu-22.04-X64-gcc.zip"
 
 # Define paths for saving the zip file and extracting it
 artifact_dir = joinpath(@__DIR__, "bin")  # Destination for binary files
