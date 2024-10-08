@@ -4,7 +4,7 @@ using Downloads
 url = "https://github.com/ANTsX/ANTs/releases/download/v2.5.3"
 
 # Define paths for saving the zip file and extracting it
-artifact_dir = joinpath(dirname(Base.source_path()), "bin")  # Destination for binary files
+artifact_dir = joinpath(@__DIR__, "bin")  # Destination for binary files
 zip_path = joinpath(artifact_dir, "ants-2.5.3-ubuntu-22.04-X64-gcc.zip")  # Using the correct file name
 
 # Create the destination directory if it doesn't exist
