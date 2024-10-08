@@ -26,7 +26,7 @@ include("convertTransformFiles.jl")
 ants_path = joinpath(@__DIR__, "deps", "bin", "antsRegistration")  # Adjust based on the binary name
 
 # Example command to call the ANTs binary
-run(`$ants_path --version`)
+#run(`$ants_path --version`)
 
 # Per-user working path
 function userpath()
