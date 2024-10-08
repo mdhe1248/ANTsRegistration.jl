@@ -52,7 +52,7 @@ The transform might be one of the following:
 ```julia
 transform = Global("Rigid")
 transform = Global("Affine")
-transform = Syn()
+transform = SyN()
 ```
 The last one is for a diffeomorphism (warping) registration.
 
@@ -116,7 +116,7 @@ deformable registration:
 
 ```julia
 stageaff = Stage(fixed, Global("Affine"))
-stagesyn = Stage(fixed, Syn())
+stagesyn = Stage(fixed, SyN())
 itktforms = register(fixed, moving, [stageaff,stagesyn]; kwargs...)
 imgw = applyTransforms(Tform.(itktforms[[2,1]]), fixed, moving; kwargs...) #itktforms[1]: affine, itktforms[2]: warp
 ```
