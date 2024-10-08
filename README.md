@@ -98,22 +98,26 @@ would be appropriate for a two-iteration stage.
 
 To register the single image `moving` to the single image `fixed`, use
 ```julia
-imgw = register(fixed, moving, pipeline; kwargs...)
+itktforms = register(fixed, moving, pipeline; kwargs...)
+imgw = applyTransform(Tform.(itktforms), fixed, moving; kwargs...)
 ```
 
-where `pipeline` is a single `Stage` or a vector of stages. For
+where `itktform` is a vector of transformation information, and `pipeline` is a single `Stage` or a vector of stages. For
 example, you can begin with an affine registration followed by a
 deformable registration:
 
 ```julia
 stageaff = Stage(fixed, Global("Affine"))
 stagesyn = Stage(fixed, Syn())
-imgw = register(fixed, moving, [stageaff,stagesyn]; kwargs...)
+itktforms = register(fixed, moving, [stageaff,stagesyn]; kwargs...)
+imgw = applyTransform(Tform.(itktforms[[2,1]]), fixed, moving; kwargs...)
 ```
 
 This choice will align the images as well as possible (given the
 default parameters) using a pure-affine transformation, and then
 introduce warping where needed to improve the alignment.
+
+#The below has not been verified.
 
 If instead you'd like to correct for motion in an image sequence, consider
 ```julia
