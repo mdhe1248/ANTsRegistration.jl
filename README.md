@@ -107,42 +107,39 @@ would be appropriate for a two-iteration stage.
 To register the single image `moving` to the single image `fixed`, use
 ```julia
 itktforms = register(fixed, moving, pipeline; kwargs...)
-imgw = applyTransform(Tform.(itktforms), fixed, moving; kwargs...)
+imgw = applyTransforms(Tform.(itktforms), fixed, moving; kwargs...)
 ```
-
-where `itktform` is a vector of transformation information, and `pipeline` is a single `Stage` or a vector of stages. For
-example, you can begin with an affine registration followed by a
+where `pipeline` is a single `Stage` or a vector of stages. 
+`itktform` is a vector of transformation information, which may contain affine, warp, and inverse warp.
+For example, you can begin with an affine registration followed by a
 deformable registration:
 
 ```julia
 stageaff = Stage(fixed, Global("Affine"))
 stagesyn = Stage(fixed, Syn())
 itktforms = register(fixed, moving, [stageaff,stagesyn]; kwargs...)
-imgw = applyTransform(Tform.(itktforms[[2,1]]), fixed, moving; kwargs...)
+imgw = applyTransforms(Tform.(itktforms[[2,1]]), fixed, moving; kwargs...) #itktforms[1]: affine, itktforms[2]: warp
 ```
 
 This choice will align the images as well as possible (given the
 default parameters) using a pure-affine transformation, and then
-introduce warping where needed to improve the alignment.
+introduce warping where needed to improve the alignment. 
+Note that the order of warp and affine transforms are reversed in `applyTransform`.
 
+For inverse transformation in this particular example, the transformation can be assigned
 
-If you would like to obtain the transformations and apply them to one or multiple image, the following would be more useful.
 ```julia
-register(output, nd, fixedname, movingname, pipeline) #output is a prefix of output transform files, but not a file name.
-applyTransforms(outputname, nd, tfms, fixedname, movingname) #outputname is image file name. e.g. "test.nrrd".
+inverse_tfms = [Tform(itktforms[1], 1), Tform(itktforms[3])] #itktforms[1]: affine, itktforms[3]: inversewarp.
+imginv = applyTransforms(inverse_tfms, fixed, imgw; kwargs...)
 ```
-Here, `nd` is the dimension of your images (e.g. nd = 2). `fixedname` and `movingname` are image file names (.nrrd works well). They should have been saved on the disk before running `register`. After `register`, you will obtain transformation files, which are the inputs to applyTransforms: `tfms` are the output of `register`. 
-```jl
-tfms = [Tform(output*"1Warp.nii.gz), Tform(output*"0GenericAffine.mat")]
-```
-Note that the order of warp and affine transforms are reversed (assuming that affine registration comes first in the registeration pipeline).
 
-For inverse transformations,
-```jl
-tfms = [Tform(output*"0GenericAffine.mat", 1), output*"1InverseWarp.nii.gz"]
-```
-Inverse transforms seem to be particularly useful one needs to transform points in the original image space to the trahsformed image space. (Please correct me if I am wrong).
+Inverse transformation seems to be particularly useful when one needs to transform points in the original image space to the transformed space.
 
+```julia
+points = [Point(1,1), Point(100,100)] #assuming that the image is in 2-D space.
+nd = 2 #dimension
+pout = applyTransformsToPoints(nd, inverse_tfms, points)
+```
 
 If you'd like to correct for motion in an image sequence, consider
 
