@@ -1,8 +1,10 @@
 Forked from timholy/ANTsRegistration.jl
+
 - ANTs binary will not be automatically installed.
 - To use this fork, please first install ANTsRegistration on your machine. For installation, the following websites might help:
 https://github.com/ANTsX/ANTs?tab=readme-ov-file, https://github.com/ANTsX/ANTs/releases,  https://github.com/ANTsX/ANTs/wiki/Installing-ANTs-release-binaries
 - `antsApplyTransforms` and `antsApplyTransformsToPoints` functions are added. Please see runtest codes.
+
 
 # ANTsRegistration
 
@@ -123,9 +125,27 @@ This choice will align the images as well as possible (given the
 default parameters) using a pure-affine transformation, and then
 introduce warping where needed to improve the alignment.
 
-#The below has not been verified.
 
-If instead you'd like to correct for motion in an image sequence, consider
+If you would like to obtain the transformations and apply them to one or multiple image, the following would be more useful.
+```julia
+register(output, nd, fixedname, movingname, pipeline) #output is a prefix of output transform files, but not a file name.
+applyTransforms(outputname, nd, tfms, fixedname, movingname) #outputname is image file name. e.g. "test.nrrd".
+```
+Here, `nd` is the dimension of your images (e.g. nd = 2). `fixedname` and `movingname` are image file names (.nrrd works well). They should have been saved on the disk before running `register`. After `register`, you will obtain transformation files, which are the inputs to applyTransforms: `tfms` are the output of `register`. 
+```jl
+tfms = [Tform(output*"1Warp.nii.gz), Tform(output*"0GenericAffine.mat")]
+```
+Note that the order of warp and affine transforms are reversed (assuming that affine registration comes first in the registeration pipeline).
+
+For inverse transformations,
+```jl
+tfms = [Tform(output*"0GenericAffine.mat", 1), output*"1InverseWarp.nii.gz"]
+```
+Inverse transforms seem to be particularly useful one needs to transform points in the original image space to the trahsformed image space. (Please correct me if I am wrong).
+
+
+If you'd like to correct for motion in an image sequence, consider
+
 ```julia
 motioncorr((infofilename, warpedfilename), fixed, movingfilename, pipeline)
 ```
@@ -136,6 +156,7 @@ for each image in the series.
 
 For more detailed information, see the help on individual types and
 functions.
+
 
 ### Some notes for working on Windows
 Currently, ANTs does not actively support Windows system, officially, they suggest using Linux subsystem instead.
