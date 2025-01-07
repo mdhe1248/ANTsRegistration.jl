@@ -210,26 +210,26 @@ function default_convergence(sz::Dims, transform::SyN)
     return islarge ? ((100,100,70,50,0), 1e-6, 10) : ((100,70,50,0), 1e-6, 10)
 end
 
-function get_itktforms(output, pipeline::AbstractVector{<:Stage}; save_tform_file::Bool = true)
+function get_itktforms(nd, output, pipeline::AbstractVector{<:Stage}; save_tform_file::Bool = true)
     tformlist = unique(map(pipe -> typeof(pipe.transform), pipeline))
     tform_output= Vector{ITKTransform}()
     afffile_mat, afffile_txt = output*"0GenericAffine.mat", output*"0GenericAffine.txt"
     warpfile_mat, warpfile_txt = output*"1Warp.nii.gz", output*"1Warp.txt"
     invfile_mat, invfile_txt = output*"1InverseWarp.nii.gz", output*"1InverseWarp.txt"
     if Global ∈ tformlist
-        convertTransformFile(afffile_mat, afffile_txt)
+        convertTransformFile(nd, afffile_mat, afffile_txt)
         aff_tform = load_itktform(afffile_txt)
         push!(tform_output, aff_tform)
         rm(afffile_txt)
     end
     if SyN ∈ tformlist
         # warp transformation
-        convertTransformFile(warpfile_mat, warpfile_txt)
+        convertTransformFile(nd, warpfile_mat, warpfile_txt)
         warp_tform = load_itktform(warpfile_txt)
         push!(tform_output, warp_tform)
         rm(warpfile_txt)
         # inversewarp transformation
-        convertTransformFile(invfile_mat, invfile_txt)
+        convertTransformFile(nd, invfile_mat, invfile_txt)
         inv_tform = load_itktform(invfile_txt)
         push!(tform_output, inv_tform)
         rm(invfile_txt)
@@ -288,7 +288,7 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
     else
         run(cmd)
     end
-    get_itktforms(output, pipeline; save_tform_file = save_tform_file)
+    get_itktforms(nd, output, pipeline; save_tform_file = save_tform_file)
 end
 
 function register(output, nd::Int, fixedname::AbstractString, movingname::AbstractString, pipeline::AbstractVector{<:Stage}; kwargs...) #set save_tform_file true

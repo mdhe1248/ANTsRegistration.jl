@@ -16,8 +16,8 @@ function Base.show(io::IO, s::ITKTransform)
 end
 
 """ConvertTransformFile in ANTs"""
-function convertTransformFile(tformfile::AbstractString, outputtxtfile::AbstractString)
-    cmd = `ConvertTransformFile 2 $tformfile $outputtxtfile`
+function convertTransformFile(nd, tformfile::AbstractString, outputtxtfile::AbstractString)
+    cmd = `ConvertTransformFile $nd $tformfile $outputtxtfile`
     run(cmd)
 end
 
