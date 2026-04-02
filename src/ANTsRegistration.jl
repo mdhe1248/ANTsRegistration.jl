@@ -5,6 +5,7 @@ using Images, Glob, Random, Unitful, Suppressor, DataFrames, CSV
 export register, motioncorr, warp, Global, SyN, MeanSquares, CC, MI, Stage
 export Tform, Linear, NearestNeighbor, MultiLabel, Gaussian, BSpline, CosineWindowedSinc, HammingWindowedSinc, LanczosWindowedSinc, GenericLabel, Point, applyTransformsToPoints, applyTransforms
 export ITKTransform, convertTransformFile, load_itktform, save_itktform
+export itktransXY
 
 include("applytransforms.jl")
 include("convertTransformFiles.jl")
