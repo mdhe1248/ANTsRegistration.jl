@@ -7,19 +7,17 @@ itktrans = itktransXY(p)
 itktforms = register(fixed, moving, stageaff; initial_moving_transform = [Tform(itktrans)])
 imgw = applyTransforms(Tform.([itktrans, itktforms[1]]), fixed, moving)
 """
-function itktransXY(fixed2moving::Pair) #FIXME make it compatible with CoordinateTransformations
-    p = first(fixed2moving) .- last(fixed2moving)
+function itktransXY(moving2fixed::Pair) #FIXME make it compatible with CoordinateTransformations
+    p = first(moving2fixed) .- last(moving2fixed)
     itktransXY(p)
 end
 
-function itktransXY(fixed2moving)
+function itktransXY(moving2fixed)
         tform = ITKTransform("GenericAffine",
              "#Insight Transform File V1.0",
              "#Transform 0",
              "AffineTransform_double_2_2",
-             (1.0, 0.0, 0.0, 1.0, Float64.(fixed2moving)...),
+             (1.0, 0.0, 0.0, 1.0, Float64.(moving2fixed).*-1...),
              (0.0, 0.0)
             )
 end
-
-
