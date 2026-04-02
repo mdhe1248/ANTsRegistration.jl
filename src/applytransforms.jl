@@ -1,4 +1,4 @@
-tkabstract type AbstractAntsInterpolation end
+abstract type AbstractAntsInterpolation end
 
 ####Interpolation mode
 interpolation_mode = ("Linear", "NearestNeighbor", "MultiLabel", "Gaussian", "BSpline", "CosineWindowedSinc", "HammingWindowedSinc", "LanczosWindowedSinc", "GenericLabel") 
