@@ -1,7 +1,7 @@
 name = "ANTsRegistration"
 uuid = "084f3631-7eb2-446c-b8ed-543d1c4bdaa0"
-authors = ["Tim Holy"]
 version = "0.1.0"
+authors = ["Tim Holy"]
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
