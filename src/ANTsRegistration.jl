@@ -268,21 +268,23 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
         cmd = `$cmd --random-seed $seed`
     end
     if isa(initial_moving_transform, Tform) #FIXME
-        # save as a tform file:
+        # save as a temporary tform file:
         outname = joinpath(ANTsRegistration.userpath(), randstring(10))
-        tmpTransformFilename = outname*".txt"
-        save_itktform(tmpTransformFilename, initial_moving_transform.transform)
+        tmpMovingTransformFilename = outname*".txt"
+        save_itktform(tmpMovingTransformFilename, initial_moving_transform.transform)
         # run cmd:
-        cmd = `$cmd --initial-moving-transform \[$(tmpTransformFilename), $(initial_moving_transform.useInverse)\]`
+        cmd = `$cmd --initial-moving-transform \[$(tmpMovingTransformFilename),$(initial_moving_transform.useInverse)\]`
         # remove the tform file
-        rm(tmpTransformFilename)
     elseif isa(initial_moving_transform, NTuple)
-        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform[1]), $(initial_moving_tform[2]), $(initial_moving_tform[3])\]`
+        cmd = `$cmd --initial-moving-transform \[$(initial_moving_transform[1]),$(initial_moving_tform[2]),$(initial_moving_tform[3])\]`
     end
     if isa(initial_fixed_transform, Tform)
-        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform.transformFileName), $(initial_moving_transform.useInverse)\]`
+        outname = joinpath(ANTsRegistration.userpath(), randstring(10))
+        tmpFixedTransformFilename = outname*".txt"
+        save_itktform(tmpFixedTransformFilename, initial_fixed_transform.transform)
+        cmd = `$cmd --initial-fixed-transform \[$(tmpFixedTransformFilename),$(initial_fixed_transform.useInverse)\]`
     elseif isa(initial_fixed_transform, NTuple)
-        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform[1]), $(initial_fixed_tform[2]), $(initial_fixed_tform[3])\]`
+        cmd = `$cmd --initial-fixed-transform \[$(initial_fixed_transform[1]),$(initial_fixed_tform[2]),$(initial_fixed_tform[3])\]`
     end
     for pipe in pipeline
         cmd = shcmd(cmd, pipe, fixedname, movingname)
@@ -296,6 +298,12 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
         @suppress_out run(cmd)
     else
         run(cmd)
+    end
+    if isa(initial_moving_transform, Tform)
+        rm(tmpMovingTransformFilename) #remove temporary tform file
+    end
+    if isa(initial_fixed_transform, Tform)
+        rm(tmpFixedTransformFilename) #remove temporary tform file
     end
     get_itktforms(output, pipeline; save_tform_file = save_tform_file)
 end
