@@ -271,7 +271,7 @@ function register(output, nd::Int, fixedname::AbstractString, movingname::Abstra
         # save as a tform file:
         outname = joinpath(ANTsRegistration.userpath(), randstring(10))
         tmpTransformFilename = outname*".txt"
-        save_itktform(initial_moving_transform.transform, tmpTransformFilename)
+        save_itktform(tmpTransformFilename, initial_moving_transform.transform)
         # run cmd:
         cmd = `$cmd --initial-moving-transform \[$(tmpTransformFilename), $(initial_moving_transform.useInverse)\]`
         # remove the tform file
