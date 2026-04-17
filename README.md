@@ -33,8 +33,20 @@ fixed, moving = load("myfixedimage.tif"), load("mymovingimage.tif")
 stageaff= Stage(fixed, Global("Affine"))
 stagesyn= Stage(fixed, SyN())
 itktforms = register(fixed, moving, [stageaff, stagesyn]) # `itktforms` contains affine transform, warp, and inverse warp.
-imgw = applyTransforms(Tform.(itktforms[[1,2]]), fixed, moving)  # To apply affine and warp, use the first two elements in `itktforms`. 
+imgw = applyTransforms(Tform.(itktforms[[1,2]]), fixed, moving)  # To apply affine and warp, use the first two elements in `itktforms`.
 ```
+```jl
+# For motion correction, one may try motionCorr below but I have not tested. Instead, try for loop.
+img = load("my_timelapse_image.tif")
+fixed = dropdims(mean(img, dims = 3), dims = 3)
+movings = [@view(img[:,:,i] for i in 1:size(img, 3)] #slices
+#You may need `reinterpret` to convert image into raw image. Then, you may convert image into Float32 or Float64.
+
+stageaff= Stage(fixed, Global("Affine"))
+stagesyn= Stage(fixed, SyN())
+itktforms = [register(fixed, moving, [stageaff, stagesyn]) for moving in movings]# `itktforms` contains affine transform, warp, and inverse warp.
+imgw = [applyTransforms(Tform.(itktforms[i][[1,2]]), fixed, moving) for (i, moving) in enumerate(movings)]  # To apply affine and warp, use the first two elements in
+imshow(stack(imgw)) #check image
 
 ### Image data and file format
 
