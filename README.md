@@ -23,6 +23,19 @@ registration and motion correction suite.
 
 ## Usage
 
+### Example usage
+```julia
+using Images
+using ANTsRegistration
+fixed, moving = load("myfixedimage.tif"), load("mymovingimage.tif")
+
+## Antsregistration
+stageaff= Stage(fixed, Global("Affine"))
+stagesyn= Stage(fixed, SyN())
+itktforms = register(fixed, moving, [stageaff, stagesyn])
+imgw = applyTransforms(Tform.(itktforms[1]), fixed, moving)
+```
+
 ### Image data and file format
 
 If you are passing the data via filenames, ensure that you have stored
