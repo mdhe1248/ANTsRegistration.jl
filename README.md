@@ -47,6 +47,7 @@ stagesyn= Stage(fixed, SyN())
 itktforms = [register(fixed, moving, [stageaff, stagesyn]) for moving in movings]# `itktforms` contains affine transform, warp, and inverse warp.
 imgw = [applyTransforms(Tform.(itktforms[i][[1,2]]), fixed, moving) for (i, moving) in enumerate(movings)]  # To apply affine and warp, use the first two elements in
 imshow(stack(imgw)) #check image
+```
 
 ### Image data and file format
 
