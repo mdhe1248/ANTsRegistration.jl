@@ -37,6 +37,8 @@ imgw = applyTransforms(Tform.(itktforms[[1,2]]), fixed, moving)  # To apply affi
 ```
 ```jl
 # For motion correction, one may try motionCorr below but I have not tested. Instead, try for loop.
+using Images, ImageView
+using ANTsRegistration
 img = load("my_timelapse_image.tif")
 imgraw = rawview(channelview(img)) #Tiff usually contains a normalized, gray image. 
 fixed = dropdims(mean(imgraw, dims = 3), dims = 3)
