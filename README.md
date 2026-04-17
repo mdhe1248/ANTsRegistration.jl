@@ -32,8 +32,8 @@ fixed, moving = load("myfixedimage.tif"), load("mymovingimage.tif")
 ## Antsregistration
 stageaff= Stage(fixed, Global("Affine"))
 stagesyn= Stage(fixed, SyN())
-itktforms = register(fixed, moving, [stageaff, stagesyn])
-imgw = applyTransforms(Tform.(itktforms[1]), fixed, moving)
+itktforms = register(fixed, moving, [stageaff, stagesyn]) # `itktforms` contains affine transform, warp, and inverse warp.
+imgw = applyTransforms(Tform.(itktforms[[1,2]]), fixed, moving)  # To apply affine and warp, use the first two elements in `itktforms`. 
 ```
 
 ### Image data and file format
