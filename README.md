@@ -38,9 +38,9 @@ imgw = applyTransforms(Tform.(itktforms[[1,2]]), fixed, moving)  # To apply affi
 ```jl
 # For motion correction, one may try motionCorr below but I have not tested. Instead, try for loop.
 img = load("my_timelapse_image.tif")
-fixed = dropdims(mean(img, dims = 3), dims = 3)
-movings = [@view(img[:,:,i] for i in 1:size(img, 3)] #slices
-#You may need `reinterpret` to convert image into raw image. Then, you may convert image into Float32 or Float64.
+imgraw = rawview(channelview(img)) #Tiff usually contains a normalized, gray image. 
+fixed = dropdims(mean(imgraw, dims = 3), dims = 3)
+movings = [@view(imgraw[:,:,i] for i in 1:size(imgraw, 3)] #slices
 
 stageaff= Stage(fixed, Global("Affine"))
 stagesyn= Stage(fixed, SyN())
